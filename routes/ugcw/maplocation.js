@@ -20,11 +20,11 @@ module.exports = {
 
 
   $drawImage[1;$getVar[positionx$getVar[$getQuery[userid]-position]];$getVar[positiony$getVar[$getQuery[userid]-position]];80;90]
-  $loadImage[1;path;./naicul-walk-$getVar[$getQuery[userid]-movement].png]
+  $loadImage[1;path;./assets/images/naicul-walk-$getVar[$getQuery[userid]-movement].png]
  
   $drawImage[base;0;0;800;800]
   $tryif[$getVar[$getQuery[userid]-location]==home-town;@setVar(@getQuery(userid)-townsfolk;momfront.png|momback.png|person1front.png|person1back.png|8|14|16|22)]
 $tryif[$getVar[$getQuery[userid]-location]==route1;@setVar(@getQuery(userid)-townsfolk;@ternary(@getVar(@getQuery(userid)-stage)==1;stranger1side.png;assets/chess/blank.png)|@ternary(@getVar(@getQuery(userid)-stage)==1;stranger1side.png;assets/chess/blank.png)|@ternary(@getVar(@getQuery(userid)-stage)==1;stranger1side.png;assets/chess/blank.png)|@ternary(@getVar(@getQuery(userid)-stage)==1;stranger1side.png;assets/chess/blank.png)|17|17|17|17)]
-  $loadImage[base;path;./$getVar[$getQuery[userid]-location].jpg]
+  $loadImage[base;path;./assets/images/$getVar[$getQuery[userid]-location].jpeg]
   $createCanvas[800;800]
   `}
