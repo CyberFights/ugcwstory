@@ -7,7 +7,7 @@ module.exports = {
   $drawText[$replaceText[$getQuery[clock];";];15;725;200;80]
   $font[40;como]
   $color[#000000]
-  $registerFont[./Comunismo.ttf;como]
+  $registerFont[./assets/fonts/Comunismo.ttf;como]
   $opacity[100]
   $tryif[$getVar[$getQuery[userid]-stage]==start&&$getVar[$getQuery[userid]-position]==15;
   @drawText(Let me free @getVar(@getQuery(userid)-name);@math(@getVar(positionx20)+15);@math(@getVar(positiony20)+10);@get(w);@get(h))
