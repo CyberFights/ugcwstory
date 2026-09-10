@@ -5,7 +5,7 @@ const api = new API({
   database: {
         enabled: true,
         type: 'mongo', // 'replit', 'mongo', 'default'
-        // mongoUrl: 'process.env.MONGO_URL'
+        mongoUrl: 'process.env.MONGO_URL'
     }
 
 })
