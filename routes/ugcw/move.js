@@ -16,7 +16,7 @@ module.exports = {
   "battle_image": "$ternary[$getVar[$getQuery[userid]-encounter]==true;https://shadows-api-pokemon.shadowsnemesis.repl.co/game/pokemon/encountered?userid=$getQuery[userid]&opponent=$getVar[$getQuery[userid]-opponent];null]",
   "opponent": "$getVar[$getQuery[userid]-opponent]"
   }]
-  $var[map;http://shadows-api-pokemon.shadowsnemesis.repl.co/game/pokemon/maplocation?userid=$getQuery[userid]&steps=$getVar[$getQuery[userid]-steps]&position=$getVar[$getQuery[userid]-position]&location=$getVar[$getQuery[userid]-location]&time=$getQuery[time]&clock=$getQuery[clock]&stage=$getVar[$getQuery[userid]-stage]]
+  $var[map;http://ugcwrp-production.up.railway.app/ugcw/maplocation?userid=$getQuery[userid]&steps=$getVar[$getQuery[userid]-steps]&position=$getVar[$getQuery[userid]-position]&location=$getVar[$getQuery[userid]-location]&time=$getQuery[time]&clock=$getQuery[clock]&stage=$getVar[$getQuery[userid]-stage]]
 
   $setVar[$getQuery[userid]-clock;$getQuery[clock]]
   $setVar[$getQuery[userid]-steps;$getQuery[steps]]
