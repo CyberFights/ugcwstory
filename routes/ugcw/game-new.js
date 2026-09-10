@@ -1,4 +1,4 @@
-module.exports = {
+module.exports = { 
   path: "/ugcw/game-new",
   code: `
   $send[200;json;{
@@ -93,7 +93,7 @@ $setVar[$getQuery[userid]-potions;0]
 $setVar[$getQuery[userid]-pokecoins;500]
 $setVar[$getQuery[userid]-fishingrod;0]
 
-$setVar[terrain-ruincity1;x/x/x/x/x/ruincity2/x/x/x/x/x/-/x/x/x/x/x/-/ruincity3/-/-/-/-/-x/x/x/-/x/x/x/x/x/-/x/x]
+$setVar[terrain-ruincity1;x/x/x/x/x/ruincity2/x/x/x/x/x/-/x/x/x/x/x/-/ruincity3/-/-/-/-/-/x/x/-/x/x/x/x/x/-/x/x/x]
 $setVar[terrain-lab;x/x/home-town/x/x/x/x/x/-/-/-/x/
 x/-/-/-/x/x/x/x/-/-/x/x/
 x/x/-/-/x/x/x/x/x/home-town/x/x]
