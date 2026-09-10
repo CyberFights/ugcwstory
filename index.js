@@ -4,8 +4,8 @@ const api = new API({
     port: process.env.PORT || 3000,
   database: {
         enabled: true,
-        type: 'replit', // 'replit', 'mongo', 'default'
-        // mongoUrl: '....'
+        type: 'mongo', // 'replit', 'mongo', 'default'
+        // mongoUrl: 'process.env.MONGO_URL'
     }
 
 })
