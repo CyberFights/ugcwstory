@@ -1,5 +1,5 @@
 module.exports = {
-  path: "/game/pokemon/game-new",
+  path: "/game/ugcw/game-new",
   code: `
   $send[200;json;{
   "name": "$getVar[$getQuery[userid]-name]",
