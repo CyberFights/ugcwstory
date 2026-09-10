@@ -1,5 +1,5 @@
 module.exports = {
-  path: "/game/pokemon/pokegame-new",
+  path: "/game/pokemon/game-new",
   code: `
   $send[200;json;{
   "name": "$getVar[$getQuery[userid]-name]",
@@ -12,20 +12,14 @@ module.exports = {
 $var[map;http://shadows-api-pokemon.shadowsnemesis.repl.co/game/pokemon/maplocation?userid=$getQuery[userid]&steps=$getVar[$getQuery[userid]-steps]&position=$getVar[$getQuery[userid]-position]&location=$getVar[$getQuery[userid]-location]&time=$getQuery[time]&clock=$getQuery[clock]&stage=$getVar[$getQuery[userid]-stage]]
 $setVar[$getQuery[userid]-movement;stand]
 
-$setVar[$getQuery[userid]-pokemon1;undefined]
-
-$setVar[$getQuery[userid]-pokemon2;undefined]
-$setVar[$getQuery[userid]-pokemon3;undefined]
-$setVar[$getQuery[userid]-pokemon4;undefined]
-$setVar[$getQuery[userid]-pokemon5;undefined]
-$setVar[$getQuery[userid]-pokemon6;undefined]
+$set
    $setVar[$getQuery[userid]-steps;0]
    
   $setVar[$getQuery[userid]-name;$getQuery[name]]
   
-  $setVar[$getQuery[userid]-position;13]
+  $setVar[$getQuery[userid]-position;28]
   
-$setVar[$getQuery[userid]-location;home-town]
+$setVar[$getQuery[userid]-location;ruincity1]
 
 $setVar[$getQuery[userid]-stage;start]
 
@@ -93,17 +87,13 @@ $setVar[positiony29;690]
 $setVar[positionx30;747]
 $setVar[positiony30;690]
 
-$setVar[$getQuery[userid]-pokeballs;0]
-$setVar[$getQuery[userid]-greatballs;0]
-$setVar[$getQuery[userid]-ultraballs;0]
+
 $setVar[$getQuery[userid]-potions;0]
-$setVar[$getQuery[userid]-masterballs;0]
-$setVar[$getQuery[userid]-superpotions;0]
+
 $setVar[$getQuery[userid]-pokecoins;500]
 $setVar[$getQuery[userid]-fishingrod;0]
 
-$setVar[terrain-home-town;lake/-/-/-/-/route1/home/-/x/lab/x/x/-/-/-/-/-/route1/-/rival/-/x/x/x/
--/-/-/-/-/x/x/x/x/x/x/x]
+$setVar[terrain-ruincity1;x/x/x/x/x/ruincity2/x/x/x/x/x/-/x/x/x/x/x/-/ruincity3/-/-/-/-/-x/x/x/-/x/x/x/x/x/-/x/x]
 $setVar[terrain-lab;x/x/home-town/x/x/x/x/x/-/-/-/x/
 x/-/-/-/x/x/x/x/-/-/x/x/
 x/x/-/-/x/x/x/x/x/home-town/x/x]
