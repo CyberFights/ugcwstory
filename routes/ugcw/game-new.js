@@ -10,9 +10,9 @@ module.exports = {
   }]
 
 $var[map;http://shadows-api-pokemon.shadowsnemesis.repl.co/game/pokemon/maplocation?userid=$getQuery[userid]&steps=$getVar[$getQuery[userid]-steps]&position=$getVar[$getQuery[userid]-position]&location=$getVar[$getQuery[userid]-location]&time=$getQuery[time]&clock=$getQuery[clock]&stage=$getVar[$getQuery[userid]-stage]]
-$setVar[$getQuery[userid]-movement;stand]
+$setVar[$getQuery[userid]-movement;up]
 
-$set
+
    $setVar[$getQuery[userid]-steps;0]
    
   $setVar[$getQuery[userid]-name;$getQuery[name]]
