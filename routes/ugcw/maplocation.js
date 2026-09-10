@@ -12,7 +12,7 @@ module.exports = {
   $tryif[$getVar[$getQuery[userid]-stage]==start&&$getVar[$getQuery[userid]-position]==15;
   @drawText(Let me free @getVar(@getQuery(userid)-name);@math(@getVar(positionx20)+15);@math(@getVar(positiony20)+10);@get(w);@get(h))
   @drawImage(textbox;@getVar(positionx20);@getVar(positiony20);@math(@get(w)+50);@math(@get(h)+50))
-  @loadImage(textbox;path;./assets/comic/comicbox2.png)
+  @loadImage(textbox;path;./assets/images/comicbox2.png)
   @var(h;@measureText(Let me free @getVar(@getQuery(userid)-name);height))
   @var(w;@measureText(Let me free @getVar(@getQuery(userid)-name);width))
   @font(40;Arial;bold)
