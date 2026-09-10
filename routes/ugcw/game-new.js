@@ -17,7 +17,7 @@ $setVar[$getQuery[userid]-movement;up]
    
   $setVar[$getQuery[userid]-name;$getQuery[name]]
   
-  $setVar[$getQuery[userid]-position;28]
+  $setVar[$getQuery[userid]-position;27]
   
 $setVar[$getQuery[userid]-location;ruincity1]
 
