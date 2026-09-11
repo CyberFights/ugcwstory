@@ -95,7 +95,7 @@ $setVar[$getQuery[userid]-fishingrod;0]
 
 $setVar[terrain-ruincity1;x/x/x/x/x/ruincity2/x/x/x/x/x/-/x/x/x/x/x/-/ruincity3/-/-/-/-/-/x/x/-/x/x/x/x/x/-/x/x/x]
 $setVar[terrain-ruincity3;water/x/x/x/-/x/water/x/x/x/-/x/water/x/x/x/-/x/water/x/-/-/-/ruincity2/water/x/x/x/x/x/water/water/water/water/x/x]
-$setVar[terrain-route1;-/-/-/grass/grass/x/x/x/x/x/x/x/home-town/-/-/-/-/forest1/x/grass/grass/grass/grass/x/x/grass/grass/grass/grass/x/x/x/x/x/x/x]
+$setVar[terrain-ruincity2;x/ruincity4/-/-/-/-/x/-/x/x/x/-/x/x/x/x/x/-/x/x/x/x/x/-/x/x/x/x/x/-/x/x/x/x/x/ruincity1]
 $setVar[terrain-forest1;x/x/forest4/x/x/x/route1/-/-/grass/x/x/x/x/-/grass/x/x/x/grass/-/-/-/forest2/x/x/grass/grass/grass/x/x/x/x/x/x/x]
 
   `
