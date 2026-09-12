@@ -97,6 +97,6 @@ $setVar[terrain-ruincity1;x/x/x/x/x/ruincity2/x/x/x/x/x/-/x/x/x/x/x/-/ruincity3/
 $setVar[terrain-ruincity3;water/x/x/x/-/x/water/x/x/x/-/x/water/x/x/x/-/x/water/x/-/-/-/ruincity2/water/x/x/x/x/x/water/water/water/water/x/x]
 $setVar[terrain-ruincity2;x/ruincity4/-/-/-/-/x/-/x/x/x/-/x/x/x/x/x/-/x/x/x/x/x/-/x/x/x/x/x/-/x/x/x/x/x/ruincity1]
 $setVar[terrain-ruincity5;water/x/x/x/x/x/water/x/x/x/-/ruincity4/water/x/x/x/-/x/water/x/x/x/-/x/water/x/x/x/-/x/water/x/x/x/ruincity3/x]
-
+$setVar[terrain-ruincity4;x/x/x/x/x/x/ruincity5/-/x/x/x/x/x/-/x/x/x/x/x/-/x/x/-/x/x/-/-/-/-/desert1/x/ruincity3/x/x/underground1/x]
   `
 }
