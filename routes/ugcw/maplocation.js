@@ -6,7 +6,7 @@ module.exports = {
   $drawText[$getQuery[time];90;727;200;80]
   $drawText[$replaceText[$getQuery[clock];";];15;725;200;80]
   $font[40;como]
-  $color[#000000]
+  $color[#fff]
   $registerFont[./assets/fonts/Comunismo.ttf;como]
   $opacity[100]
   $tryif[$getVar[$getQuery[userid]-stage]==start&&$getVar[$getQuery[userid]-position]==15;
