@@ -16,7 +16,7 @@ module.exports = {
 
   $setVar[$getQuery[userid]-clock;$getQuery[clock]]
 
-  $setVar[$getQuery[userid]-movement;stand]
+  $setVar[$getQuery[userid]-movement;down]
   $setVar[$getQuery[userid]-time;$ternary[$getQuery[time]==AM;day;$ternary[$getQuery[time]==PM;night;]]]
   $var[above;$getVar[pokelocation$math[$getVar[$getQuery[userid]-position]-6]]]
   $var[below;$getVar[pokelocation$math[$getVar[$getQuery[userid]-position]+6]]]
