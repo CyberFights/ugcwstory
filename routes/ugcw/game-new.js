@@ -89,10 +89,14 @@ $setVar[positiony30;690]
 
 
 $setVar[$getQuery[userid]-potions;0]
-
+$setVar[$getQuery[userid]-inbattle;false]
 $setVar[$getQuery[userid]-pokecoins;500]
 $setVar[$getQuery[userid]-fishingrod;0]
-
+$setVar[$getQuery[userid]-ruincity1-opponents;lizard|bandit]
+$setVar[$getQuery[userid]-ruincity2-opponents;lizard|bandit]
+$setVar[$getQuery[userid]-ruincity3-opponents;lizard|bandit]
+$setVar[$getQuery[userid]-ruincity4-opponents;lizard|bandit]
+$setVar[$getQuery[userid]-ruincity5-opponents;lizard|bandit]
 $setVar[terrain-ruincity1;x/x/x/x/x/ruincity2/x/x/x/x/x/-/x/x/x/x/x/-/ruincity3/-/-/-/-/-/x/x/-/x/x/x/x/x/-/x/x/x]
 $setVar[terrain-ruincity3;water/x/x/x/-/x/water/x/x/x/-/x/water/x/x/x/-/x/water/x/-/-/-/ruincity2/water/x/x/x/x/x/water/water/water/water/x/x]
 $setVar[terrain-ruincity2;x/ruincity4/-/-/-/-/x/-/x/x/x/-/x/x/x/x/x/-/x/x/x/x/x/-/x/x/x/x/x/-/x/x/x/x/x/ruincity1]
