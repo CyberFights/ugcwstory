@@ -23,8 +23,18 @@ module.exports = {
   $setVar[$getQuery[userid]-movement;$getQuery[movement]]
   $setVar[$getQuery[userid]-time;$ternary[$getQuery[time]==AM;day;$ternary[$getQuery[time]==PM;night;]]]
   
-  $tryif[$getVar[$getQuery[userid]-location]==route1;@setVar(@getQuery(userid)-opponent;@get(random))
-@var(random;@random(oddish;ekans;bellsprout;pidgey;spearow))]
+  $tryIf[$getVar[$getQuery[userid]-chance]==true;@setVar(@getQuery(userid)-encountered;true)]
+  $setVar[$getQuery[userid]-chance;$random[true;false;false;false;false]]
+  $tryif[$getVar[$getQuery[userid]-location]==ruincity1;@setVar(@getQuery(userid)-opponent;@get(random))
+@var(random;@random(lizard;bandit))]
+  $tryif[$getVar[$getQuery[userid]-location]==ruincity2;@setVar(@getQuery(userid)-opponent;@get(random))
+@var(random;@random(lizard;bandit))]
+  $tryif[$getVar[$getQuery[userid]-location]==ruincity3;@setVar(@getQuery(userid)-opponent;@get(random))
+@var(random;@random(lizard;bandit))]
+  $tryif[$getVar[$getQuery[userid]-location]==ruincity4;@setVar(@getQuery(userid)-opponent;@get(random))
+@var(random;@random(lizard;bandit))]
+  $tryif[$getVar[$getQuery[userid]-location]==ruincity5;@setVar(@getQuery(userid)-opponent;@get(random))
+@var(random;@random(lizard;bandit))]
 $tryif[$getVar[$getQuery[userid]-location]==forest1;@setVar(@getQuery(userid)-opponent;@get(random))
 @var(random;@random(paras;venonat;caterpie;weedle;spinark))]
 $tryif[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==grass;@setVar(@getQuery(userid)-encounter;@get(random))
