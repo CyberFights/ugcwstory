@@ -477,6 +477,8 @@ $ignore[========================================================================
 $var[uid;$replaceText[$getQuery[userid];";]]
 $var[sh;$getQuery[self_height]]
 $var[sw;$getQuery[self_weight]]
+$setVar[$getQuery[userid]-sh;$getQuery[self_height]]
+$setVar[$getQuery[userid]-sw;$getQuery[self_weight]]
 $var[oh;$getVar[$getQuery[userid]-oh]]
 $var[ow;$getVar[$getQuery[userid]-ow]]
 $var[mv;$lowercase[$getQuery[move]]]
