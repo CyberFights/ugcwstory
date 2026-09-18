@@ -20,7 +20,7 @@ module.exports = {
 
   $setVar[$getQuery[userid]-clock;$getQuery[clock]]
   $setVar[$getQuery[userid]-steps;$getQuery[steps]]
-  $setVar[$getQuery[userid]-movement;$getQuery[movement]]
+
   $setVar[$getQuery[userid]-time;$ternary[$getQuery[time]==AM;day;$ternary[$getQuery[time]==PM;night;]]]
   
   $tryIf[$getVar[$getQuery[userid]-chance]==true;@setVar(@getQuery(userid)-encountered;true)]
@@ -46,14 +46,14 @@ $tryif[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==grass;@setVar(@
   $tryif[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==route1;@setVar(@getQuery(userid)-location;route1)
   @setVar(@getQuery(userid)-position;@replaceText(@replaceText(@getQuery(movement);right;13);left;18)))]
   $tryif[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity4;@setVar(@getQuery(userid)-location;ruincity4)
-  @setVar(@getQuery(userid)-position;24)]
+  @setVar(@getQuery(userid)-position;31) @setVar(@getQuery(userid)-movement;up)]
   $tryif[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity3;@setVar(@getQuery(userid)-location;ruincity3)
   @setVar(@getQuery(userid)-position;18)]
 $tryif[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity1;@setVar(@getQuery(userid)-location;ruincity1)
 @setVar(@getQuery(userid)-position;6)]  
   $tryif[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity2;@setVar(@getQuery(userid)-location;ruincity2)
   @setVar(@getQuery(userid)-position;30)]
-  
+    $setVar[$getQuery[userid]-movement;$getQuery[movement]]
   $setVar[pokelocation36;$getSplit[36]]
   $setVar[pokelocation35;$getSplit[35]]
   $setVar[pokelocation34;$getSplit[34]]
