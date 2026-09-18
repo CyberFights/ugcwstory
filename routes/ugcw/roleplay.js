@@ -13,7 +13,9 @@
   ----------------
   userid            REQUIRED  -> user_id          conversation / memory id
   message           REQUIRED  -> message          what the opponent (user) did
-  system_p          OPTIONAL  -> system_p         custom persona prompt
+  system_p          OPTIONAL  -> system_p         custom persona / system prompt
+                                                  (system_prompt is accepted as an alias;
+                                                  empty = wrestle-ai default Jax Nova persona)
   in_battle         OPTIONAL  -> in_battle        true | false   (default true)
   self_height       OPTIONAL  -> height           self height in CM (same as battle-turn),
                                                   converted to inches for wrestle-ai
@@ -85,7 +87,7 @@ $setObjectKey[humanize;$get[humanize]]
 $setObjectKey[weight;$get[weight]]
 $setObjectKey[height;$get[height]]
 $setObjectKey[in_battle;$get[inbattle]]
-$tryif[$getQuery[system_p]!=undefined;@setObjectKey(system_p;@getQuery(system_p))]
+$setObjectKey[system_p;$get[sysp]]
 $setObjectKey[message;$getQuery[message]]
 $setObjectKey[user_id;$get[uid]]
 $createObject
@@ -134,6 +136,8 @@ $tryIf[$hasVar[$get[uid]-battle-self-hold]==false;@setVar(@get(uid)-battle-self-
 $tryIf[$hasVar[$get[uid]-battle-opponent-hp]==false;@setVar(@get(uid)-battle-opponent-hp;0)]
 $tryIf[$hasVar[$get[uid]-battle-self-hp]==false;@setVar(@get(uid)-battle-self-hp;0)]
 
+$ignore[system prompt: system_p (or system_prompt) query, empty = wrestle-ai default persona]
+$var[sysp;$ternary[$getQuery[system_p]!=undefined;$getQuery[system_p];$ternary[$getQuery[system_prompt]!=undefined;$getQuery[system_prompt];]]]
 $var[uid;$getQuery[userid]]
 
 $ignore[==========================================================================
