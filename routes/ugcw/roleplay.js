@@ -15,17 +15,22 @@
   message           REQUIRED  -> message          what the opponent (user) did
   system_p          OPTIONAL  -> system_p         custom persona prompt
   in_battle         OPTIONAL  -> in_battle        true | false   (default true)
-  height            OPTIONAL  -> height           self height in INCHES  (default 72)
-  weight            OPTIONAL  -> weight           self weight in LBS     (default 210)
+  self_height       OPTIONAL  -> height           self height in CM (same as battle-turn),
+                                                  converted to inches for wrestle-ai
+  self_weight       OPTIONAL  -> weight           self weight in KG (same as battle-turn),
+                                                  converted to lbs for wrestle-ai
   humanize          OPTIONAL  -> humanize         true | false   (default true)
   self_health       OPTIONAL  -> self_health      0 - 100        (default 100)
   self_trapped      OPTIONAL  -> self_trapped     true | false   (default false)
   opponent_health   OPTIONAL  -> opponent_health  0 - 100        (default 100)
   opponent_trapped  OPTIONAL  -> opponent_trapped true | false   (default false)
 
-  When height / weight / *_health are not sent, the <userid>-rp-* database
-  keys are used, and *_trapped falls back to the <userid>-battle-*-hold
-  keys written by /ugcw/battle-turn, so both routes can be chained.
+  Sizes follow battle-turn.js exactly: self from self_height / self_weight
+  (remembered in <userid>-sh / -sw), the opponent from the <userid>-oh /
+  <userid>-ow keys written by move.js. When *_health / *_trapped are not
+  sent they are derived from the <userid>-battle-*-hp (as a percent of
+  max_hp) and <userid>-battle-*-hold keys, so the route can be chained
+  straight after /ugcw/battle-turn.
 
   RESPONSE  (built with $createObject + $httpPost, sent with "safe")
   --------
@@ -92,28 +97,42 @@ $ignore[========================================================================
 $var[opptrapped;$ternary[$getQuery[opponent_trapped]==undefined;$ternary[$getVar[$get[uid]-battle-opponent-hold]>0;true;false];$ternary[$getQuery[opponent_trapped]==true;true;$ternary[$getQuery[opponent_trapped]==1;true;false]]]]
 $var[selftrapped;$ternary[$getQuery[self_trapped]==undefined;$ternary[$getVar[$get[uid]-battle-self-hold]>0;true;false];$ternary[$getQuery[self_trapped]==true;true;$ternary[$getQuery[self_trapped]==1;true;false]]]]
 
-$var[opphp;$ternary[$isNumber[$get[opphp]]==true;$get[opphp];100]]
-$var[opphp;$ternary[$getQuery[opponent_health]==undefined;$getVar[$get[uid]-rp-opponent-health];$getQuery[opponent_health]]]
-
-$var[selfhp;$ternary[$isNumber[$get[selfhp]]==true;$get[selfhp];100]]
-$var[selfhp;$ternary[$getQuery[self_health]==undefined;$getVar[$get[uid]-rp-self-health];$getQuery[self_health]]]
-
 $var[humanize;$ternary[$getQuery[humanize]==false;false;true]]
 $var[inbattle;$ternary[$getQuery[in_battle]==false;false;true]]
 
-$var[weight;$ternary[$isNumber[$get[weight]]==true;$get[weight];210]]
-$var[weight;$ternary[$getQuery[weight]==undefined;$getVar[$get[uid]-rp-weight];$getQuery[weight]]]
+$ignore[health in percent: explicit query first, otherwise battle hp / max hp
+ with the same max_hp formula as battle-turn (60 + kg*1.4 + cm*0.35).
+ An unstarted battle (hp 0) counts as full health]
+$var[opphp;$ternary[$getQuery[opponent_health]==undefined;$ternary[$getVar[$get[uid]-battle-opponent-hp]>0;$get[opppct];100];$getQuery[opponent_health]]]
+$var[selfhp;$ternary[$getQuery[self_health]==undefined;$ternary[$getVar[$get[uid]-battle-self-hp]>0;$get[selfpct];100];$getQuery[self_health]]]
+$var[opppct;$fixed[$math[$getVar[$get[uid]-battle-opponent-hp]*100/(60+$get[ow]*1.4+$get[oh]*0.35)];0]]
+$var[selfpct;$fixed[$math[$getVar[$get[uid]-battle-self-hp]*100/(60+$get[sw]*1.4+$get[sh]*0.35)];0]]
 
-$var[height;$ternary[$isNumber[$get[height]]==true;$get[height];72]]
-$var[height;$ternary[$getQuery[height]==undefined;$getVar[$get[uid]-rp-height];$getQuery[height]]]
+$ignore[wrestle-ai wants self size in inches / lbs, battle-turn works in cm / kg]
+$var[height;$fixed[$math[$get[sh]/2.54];0]]
+$var[weight;$fixed[$math[$get[sw]*2.20462];0]]
 
-$ignore[seed the database keys on the first call so $getVar never reads a missing key]
+$ignore[same inputs as battle-turn: self_height / self_weight from the query
+ (cm / kg), opponent size from the <userid>-oh / -ow keys set by move.js.
+ self size also falls back to the last values this route stored]
+$var[sh;$ternary[$isNumber[$get[sh]]==true;$get[sh];183]]
+$var[sw;$ternary[$isNumber[$get[sw]]==true;$get[sw];95]]
+$var[sh;$ternary[$getQuery[self_height]==undefined;$getVar[$get[uid]-sh];$getQuery[self_height]]]
+$var[sw;$ternary[$getQuery[self_weight]==undefined;$getVar[$get[uid]-sw];$getQuery[self_weight]]]
+$var[oh;$ternary[$isNumber[$getVar[$get[uid]-oh]]==true;$getVar[$get[uid]-oh];180]]
+$var[ow;$ternary[$isNumber[$getVar[$get[uid]-ow]]==true;$getVar[$get[uid]-ow];80]]
+
+$ignore[remember the self size and seed the keys so $getVar never reads a missing key]
+$tryIf[$getQuery[self_height]!=undefined;@setVar(@get(uid)-sh;@getQuery(self_height))]
+$tryIf[$getQuery[self_weight]!=undefined;@setVar(@get(uid)-sw;@getQuery(self_weight))]
+$tryIf[$hasVar[$get[uid]-sh]==false;@setVar(@get(uid)-sh;183)]
+$tryIf[$hasVar[$get[uid]-sw]==false;@setVar(@get(uid)-sw;95)]
+$tryIf[$hasVar[$get[uid]-oh]==false;@setVar(@get(uid)-oh;180)]
+$tryIf[$hasVar[$get[uid]-ow]==false;@setVar(@get(uid)-ow;80)]
 $tryIf[$hasVar[$get[uid]-battle-opponent-hold]==false;@setVar(@get(uid)-battle-opponent-hold;0)]
 $tryIf[$hasVar[$get[uid]-battle-self-hold]==false;@setVar(@get(uid)-battle-self-hold;0)]
-$tryIf[$hasVar[$get[uid]-rp-opponent-health]==false;@setVar(@get(uid)-rp-opponent-health;100)]
-$tryIf[$hasVar[$get[uid]-rp-self-health]==false;@setVar(@get(uid)-rp-self-health;100)]
-$tryIf[$hasVar[$get[uid]-rp-weight]==false;@setVar(@get(uid)-rp-weight;210)]
-$tryIf[$hasVar[$get[uid]-rp-height]==false;@setVar(@get(uid)-rp-height;72)]
+$tryIf[$hasVar[$get[uid]-battle-opponent-hp]==false;@setVar(@get(uid)-battle-opponent-hp;0)]
+$tryIf[$hasVar[$get[uid]-battle-self-hp]==false;@setVar(@get(uid)-battle-self-hp;0)]
 
 $var[uid;$getQuery[userid]]
 
