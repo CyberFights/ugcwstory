@@ -6,7 +6,8 @@
 
   Every call resolves ONE turn of the fight: the fighter whose turn it is
   performs one move, damage is calculated, the health points are written to
-  the database and the new values are returned as JSON.
+  the database, the turn is handed over to the roleplay module and the new
+  values plus the answer of the opponent are returned as JSON.
 
   QUERY PARAMETERS
   ----------------
@@ -16,11 +17,17 @@
   opponent_height   REQUIRED  rival height in centimeters     (50 - 300)
   opponent_weight   REQUIRED  rival weight in kilograms       (20 - 400)
   move              REQUIRED  the move used this turn (see MOVES)
+  message           REQUIRED  what you did this turn in your own words, it is
+                              handed to the roleplay module as its "message"
+                              and answers what the opponent replies
   side              OPTIONAL  self | opponent - defaults to the fighter
                               whose turn it is, sending the wrong side
                               returns 409 "out of turn"
   reset             OPTIONAL  1 | true - wipes the saved battle and starts
                               a new one at full health
+  humanize          OPTIONAL  true | false - forwarded to the roleplay module
+  system_p          OPTIONAL  custom persona prompt forwarded to the roleplay
+                              module (system_prompt is accepted as an alias)
 
   MOVES - BASIC
   -------------
@@ -108,10 +115,47 @@
   <userid>-battle-self-hold      <userid>-battle-opponent-hold
   <userid>-battle-status
 
+  ROLEPLAY MODULE
+  ---------------
+  Every call, right after the damage is applied and the new health points are
+  stored, the turn is handed over to the roleplay module with an internal GET
+
+    /ugcw/roleplay?userid=..&message=..&in_battle=true&self_height=..
+        &self_weight=..&self_health=..&self_trapped=..
+        &opponent_health=..&opponent_trapped=..
+
+  and the reply of the wrestle-ai opponent is part of this response:
+
+  roleplay          full payload of the roleplay route,
+                    { "status": 200, "request": {...}, "response": {...} }
+  roleplay_status   http status the roleplay route answered with, 0 when it
+                    could not be reached
+  roleplay_text     the opponent's line, response.response, null when there is
+                    no line
+  roleplay_meta     response.meta, what wrestle-ai reports back about the
+                    opponent (health, stamina, trapped), null when there is
+                    none
+
+  The required stats travel the way the roleplay route reads them: the self
+  size comes from self_height / self_weight, the opponent size is taken from
+  the <userid>-oh / <userid>-ow keys written by move.js, health is sent as a
+  percent of max_hp and a hold is sent as *_trapped, so the roleplay module
+  answers the turn with the same numbers this route just stored. humanize
+  defaults to true and system_p (or its system_prompt alias) is forwarded,
+  an empty one reaches the roleplay route as "undefined" which it reads as
+  the wrestle-ai default persona.
+
+  The call is synchronous: the turn takes as long as wrestle-ai needs, the
+  internal GET gives up after 150 seconds (a little over the 120 the roleplay
+  route gives wrestle-ai) and "message" travels in the query string, so keep
+  it a line or two. The roleplay call never fails the turn: if wrestle-ai or
+  the roleplay route cannot be reached the fight is still played and stored,
+  "roleplay_status" is 0 and "roleplay" holds the error body.
+
   EXAMPLE
   -------
   GET /ugcw/battle-turn?userid=naicul&self_height=180&self_weight=80
-      &opponent_height=170&opponent_weight=60&move=suplex
+      &opponent_height=170&opponent_weight=60&move=suplex&message=I lift you up
 
   {
    "battle_id": "naicul",
@@ -147,7 +191,21 @@
    "opponent": { "height_cm": 170, "weight_kg": 60, "bmi": 20.8,
                  "build": "balanced", "max_hp": 204, "hp_before": 204,
                  "hp": 160, "power": 79, "toughness": 58.5, "speed": 78.5,
-                 "guarding": 0, "hold": 0 }
+                 "guarding": 0, "hold": 0 },
+   "roleplay": {
+     "status": 200,
+     "request": { "user_id": "naicul", "message": "I lift you up",
+                  "height": 71, "weight": 176, "in_battle": true,
+                  "self_health": 96, "self_trapped": false,
+                  "opponent_health": 78, "opponent_trapped": false,
+                  "humanize": true },
+     "response": { "response": "Jax Nova's reply...", "meta": { "opponent":
+                   { "health": 100, "stamina": 100, "trapped": false } } }
+   },
+   "roleplay_text": "Jax Nova's reply...",
+   "roleplay_meta": { "opponent": { "health": 100, "stamina": 100,
+                                    "trapped": false } },
+   "roleplay_status": 200
   }
 
   Send the next call without "side" and it plays for whoever's turn it is,
@@ -222,8 +280,42 @@ $send[200;json;{
   "speed": $get[ospeed],
   "guarding": $get[oppguardnew],
   "hold": $get[oppholdnew]
- }
+ },
+ "roleplay": $get[rpjson],
+ "roleplay_text": $get[rptext],
+ "roleplay_meta": $get[rpmeta],
+ "roleplay_status": $get[rpstatus]
 }]
+
+$ignore[==========================================================================
+ STEP 15.5 - ROLEPLAY: hand the turn over to the roleplay module, an internal
+ GET to /ugcw/roleplay carrying every stat that route reads, and keep the
+ reply, the text and the meta for the response.
+ The url is built first and written last, the same way the rest of the file
+ runs. The reply of the ai is escaped by hand, backslashes, quotes and
+ newlines (the newline pattern below is a real line break, the replacement is
+ the two characters reverse slash n) because an ai line would otherwise break
+ the json that step 16 builds. An unreachable roleplay route is not fatal,
+ the turn is played and stored anyway and its error body is returned.
+==========================================================================]
+
+$var[rpjson;$ternary[$get[rpstatus]>0;$getData[$default];{"status": 0, "request": null, "response": null, "error": "roleplay module unreachable"}]]
+$var[rpmeta;$ternary[$getData[response.meta]==undefined;null;$getData[response.meta]]]
+$var[rptext;$ternary[$getData[response.response]==undefined;null;"$replaceText[$replaceText[$replaceText[$getData[response.response];\\;\\\\];";\\"];\n;\\n]"]]
+$var[rpstatus;$httpGet[$get[rpurl]]]
+$var[rpurl;$get[rpproto]://$get[rphost]/ugcw/roleplay?userid=$get[uidenv]&message=$get[msgenv]&in_battle=true&self_height=$get[sh]&self_weight=$get[sw]&self_health=$get[selfpct]&self_trapped=$get[selftrap]&opponent_health=$get[opppct]&opponent_trapped=$get[opptrap]&humanize=$get[rphuman]&system_p=$get[rpsyspenc]]
+$var[rpsyspenc;$encodeURI[$get[rpsysp]]]
+$var[rpsysp;$ternary[$getQuery[system_p]!=undefined;$getQuery[system_p];$ternary[$getQuery[system_prompt]!=undefined;$getQuery[system_prompt];undefined]]]
+$var[rphuman;$ternary[$getQuery[humanize]==undefined;true;$getQuery[humanize]]]
+$var[rphost;$getHeader[host]]
+$var[rpproto;$ternary[$getHeader[x-forwarded-proto]==undefined;$get[proto];$getHeader[x-forwarded-proto]]]
+$var[proto;$protocol]
+$var[opptrap;$ternary[$get[oppholdnew]>0;true;false]]
+$var[selftrap;$ternary[$get[selfholdnew]>0;true;false]]
+$var[opppct;$fixed[$math[100*$get[opphpnew]/$get[omaxhp]];0]]
+$var[selfpct;$fixed[$math[100*$get[selfhpnew]/$get[smaxhp]];0]]
+$var[uidenv;$encodeURI[$get[uid]]]
+$var[msgenv;$encodeURI[$get[msg]]]
 
 $ignore[==========================================================================
  STEP 15 - PERSIST: save the new health points, holds and the new turn
@@ -464,6 +556,7 @@ $ignore[========================================================================
 ==========================================================================]
 
 $if[$getQuery[move]==undefined;400;{"error": "Missing required query parameter: move"}]
+$if[$getQuery[message]==undefined;400;{"error": "Missing required query parameter: message"}]
 $if[$isNumber[$get[ow]]==false;400;{"error": "'opponent_weight' must be a number in kilograms"}]
 $if[$isNumber[$get[oh]]==false;400;{"error": "'opponent_height' must be a number in centimeters"}]
 $if[$isNumber[$get[sw]]==false;400;{"error": "'self_weight' must be a number in kilograms"}]
@@ -482,6 +575,7 @@ $setVar[$getQuery[userid]-sw;$getQuery[self_weight]]
 $var[oh;$getVar[$getQuery[userid]-oh]]
 $var[ow;$getVar[$getQuery[userid]-ow]]
 $var[mv;$lowercase[$getQuery[move]]]
+$var[msg;$getQuery[message]]
 $var[reset;$ternary[$getQuery[reset]==1;true;$ternary[$getQuery[reset]==true;true;false]]]
   `
 }

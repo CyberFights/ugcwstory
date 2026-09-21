@@ -111,6 +111,54 @@ api.interpreter.addFunction({
   }
     })
 
+api.interpreter.addFunction({
+    data: new FunctionBuilder()
+    .setName('httpGet')
+  .setValue('description', 'Sends a GET request. The reply can be read with $getData[key]. Unlike $request it has a timeout and returns the http status code.')
+  .setValue('use', '$httpGet[url;...headers?]')
+  .setValue('returns', 'Number (http status code, 0 when the request failed)'),
+  code: async d => {
+    let r = d.unpack(d);
+    if (!r.inside) return Utils.Warn('Invalid inside provided in:', d.func);
+    let [url, ...headers] = r.splits;
+    if (!url || !url.unescape().startsWith('http')) return Utils.Warn('You need to provide a valid url in:', d.func);
+
+    let reqHeaders = { 'Accept': 'application/json' };
+    for (const header of headers) {
+      let h = header.unescape();
+      let i = h.indexOf(':');
+      if (i < 1) { Utils.Warn('Invalid header provided in:', d.func); continue; }
+      reqHeaders[h.slice(0, i).trim()] = h.slice(i + 1).trim();
+    }
+
+    const axios = require('axios');
+    let status = 0;
+    let reply;
+    // the timeout stays above the 120s the roleplay route gives wrestle-ai so
+    // its own error payload arrives before this call gives up
+    const res = await axios({
+      method: 'get',
+      url: url.unescape(),
+      headers: reqHeaders,
+      timeout: 150000,
+      validateStatus: () => true
+    }).catch(e => {
+      Utils.Warn(`Request failed (${e.message}) in:`, d.func);
+      return null;
+    });
+    if (res) {
+      status = res.status;
+      reply = typeof res.data === 'object' && res.data !== null ? res.data : { response: res.data };
+    } else {
+      reply = { error: 'Request failed' };
+    }
+    d._.request_data = reply;
+    return {
+      code: d.code.resolve(`${d.func}[${r.inside}]`, status.toString())
+    };
+  }
+    })
+
 api.on('error', () => {null})
 
 // We're connecting to the API when the source has been loaded
