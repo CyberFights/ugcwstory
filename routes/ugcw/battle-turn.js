@@ -140,17 +140,20 @@
   size comes from self_height / self_weight, the opponent size is taken from
   the <userid>-oh / <userid>-ow keys written by move.js, health is sent as a
   percent of max_hp and a hold is sent as *_trapped, so the roleplay module
-  answers the turn with the same numbers this route just stored. humanize
-  defaults to true and system_p (or its system_prompt alias) is forwarded,
-  an empty one reaches the roleplay route as "undefined" which it reads as
-  the wrestle-ai default persona.
+  answers the turn with the same numbers this route just stored.
 
-  The call is synchronous: the turn takes as long as wrestle-ai needs, the
-  internal GET gives up after 150 seconds (a little over the 120 the roleplay
-  route gives wrestle-ai) and "message" travels in the query string, so keep
-  it a line or two. The roleplay call never fails the turn: if wrestle-ai or
-  the roleplay route cannot be reached the fight is still played and stored,
-  "roleplay_status" is 0 and "roleplay" holds the error body.
+  humanize defaults to true. system_p, or its system_prompt alias, is
+  forwarded to the roleplay module as system_p, and when both are sent
+  system_p wins. An empty or missing persona travels through as "undefined",
+  wrestle-ai then receives null and answers as its own default Jax Nova
+  persona. Both the persona and the message ride in the query string of the
+  internal call, so keep them a line or two.
+
+  The call is synchronous: the turn takes as long as wrestle-ai needs and the
+  internal GET gives up after 150 seconds, a little over the 120 the roleplay
+  route gives wrestle-ai. The roleplay call never fails the turn: if
+  wrestle-ai or the roleplay route cannot be reached the fight is still played
+  and stored, "roleplay_status" is 0 and "roleplay" holds the error body.
 
   EXAMPLE
   -------
