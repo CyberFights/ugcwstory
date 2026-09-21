@@ -13,7 +13,7 @@ module.exports = {
   "stage": "$getVar[$getQuery[userid]-stage]",
   "current_map": "$get[map]",
   "encountered": "$getVar[$getQuery[userid]-encounter]",
-  "battle_image": "$ternary[$getVar[$getQuery[userid]-encounter]==true;https://raw.githubusercontent.com/CyberFights/ugcwstory/refs/heads/main/assets/images/$getVar[$getQuery[userid]-location]-$getVar[$getQuery[userid]-opponent].jpeg;null]",
+  "battle_image": "https://raw.githubusercontent.com/CyberFights/ugcwstory/refs/heads/main/assets/images/$getVar[$getQuery[userid]-location]-$getVar[$getQuery[userid]-opponent].jpeg",
   "opponent": "$getVar[$getQuery[userid]-opponent]"
   }]
   $var[map;http://ugcwrp-production.up.railway.app/ugcw/maplocation?userid=$getQuery[userid]&steps=$getVar[$getQuery[userid]-steps]&position=$getVar[$getQuery[userid]-position]&location=$getVar[$getQuery[userid]-location]&time=$getQuery[time]&clock=$getQuery[clock]&stage=$getVar[$getQuery[userid]-stage]]
