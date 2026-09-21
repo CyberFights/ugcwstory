@@ -86,8 +86,8 @@ $setVar[positionx29;727]
 $setVar[positiony29;690]
 $setVar[positionx30;747]
 $setVar[positiony30;690]
-
-
+$setVar[$getQuery[userid]-sw;79]
+$setVar[$getQuery[userid]-sh;178]
 $setVar[$getQuery[userid]-potions;0]
 $setVar[$getQuery[userid]-inbattle;false]
 $setVar[$getQuery[userid]-pokecoins;500]
