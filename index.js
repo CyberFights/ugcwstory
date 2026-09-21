@@ -11,6 +11,20 @@ const api = new API({
 })
 
    api.routes.load('./routes');
+
+// easy-api.ts reads a bare dollar sign in the route code as the start of a
+// function name, and it does that even for a dollar sign that travels inside a
+// value: $getData escapes brackets and semicolons of an http answer but not the
+// dollar sign, so an answer carrying "$get[" or "$ternary[" is unpacked as if
+// the route itself had grown a new chunk, which leaves the rest of the answer
+// unresolved and can hang the request. Every string of an http answer is
+// therefore stripped of it here, once, for every route that reads one.
+const noDollar = v => {
+  if (typeof v === 'string') return v.split('$').join('');
+  if (Array.isArray(v)) return v.map(noDollar);
+  if (v && typeof v === 'object') { for (const k of Object.keys(v)) v[k] = noDollar(v[k]); return v; }
+  return v;
+};
 api.setSpaces(1)
 api.interpreter.addFunction({
     data: new FunctionBuilder()
@@ -103,6 +117,7 @@ api.interpreter.addFunction({
     } else {
       reply = { error: 'Request failed' };
     }
+    reply = noDollar(reply);
     d._.request_data = reply;
     if (objectMode) d._.object = { status, request: data, response: reply };
     return {
@@ -152,7 +167,7 @@ api.interpreter.addFunction({
     } else {
       reply = { error: 'Request failed' };
     }
-    d._.request_data = reply;
+    d._.request_data = noDollar(reply);
     return {
       code: d.code.resolve(`${d.func}[${r.inside}]`, status.toString())
     };
