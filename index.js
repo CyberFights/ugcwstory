@@ -14,17 +14,98 @@ const api = new API({
 
 // easy-api.ts reads a bare dollar sign in the route code as the start of a
 // function name, and it does that even for a dollar sign that travels inside a
-// value: $getData escapes brackets and semicolons of an http answer but not the
-// dollar sign, so an answer carrying "$get[" or "$ternary[" is unpacked as if
-// the route itself had grown a new chunk, which leaves the rest of the answer
-// unresolved and can hang the request. Every string of an http answer is
-// therefore stripped of it here, once, for every route that reads one.
-const noDollar = v => {
-  if (typeof v === 'string') return v.split('$').join('');
-  if (Array.isArray(v)) return v.map(noDollar);
-  if (v && typeof v === 'object') { for (const k of Object.keys(v)) v[k] = noDollar(v[k]); return v; }
-  return v;
+// value: unpack() finds the LAST "$var" / "$if" / ... in the whole code, so a
+// message carrying "$var" makes every $var resolve the value instead of its own
+// header, warns "Invalid inside provided in: $var" and leaves the variables
+// unset - battle-turn then answers 400 "Missing userid" for a userid that was
+// sent. $getQuery / $getData escape brackets and semicolons of a value but not
+// the dollar sign, so the sign is escaped here, once, for every getter that
+// returns one: "$" -> "@dollar" on the way in, back on the way out ($send,
+// $encodeURI, $math, ... all unescape before use). "@dollar" is unescaped
+// before "@at" so a literal "@dollar" in the input survives the round trip.
+String.prototype.escape = function () {
+  return this
+    .replaceAll('@', '@at')
+    .replaceAll('$', '@dollar')
+    .replaceAll(']', '@left')
+    .replaceAll('[', '@right')
+    .replaceAll(';', '@semi')
+    .replaceAll(':', '@colon')
+    .replaceAll('=', '@equal')
+    .replaceAll('||', '@or')
+    .replaceAll('&&', '@and')
+    .replaceAll('>', '@higher')
+    .replaceAll('<', '@lower');
 };
+String.prototype.unescape = function () {
+  return this
+    .replaceAll('@dollar', '$')
+    .replaceAll('@at', '@')
+    .replaceAll('@left', ']')
+    .replaceAll('@right', '[')
+    .replaceAll('@semi', ';')
+    .replaceAll('@colon', ':')
+    .replaceAll('@equal', '=')
+    .replaceAll('@or', '||')
+    .replaceAll('@and', '&&')
+    .replaceAll('@higher', '>')
+    .replaceAll('@lower', '<')
+    .replaceAll('@left_parent', ')')
+    .replaceAll('@right_parent', '(');
+};
+
+// $getVar crashes on anything that is not a string: move.js stores heights,
+// weights and positions as numbers (hjson parses "183" to 183) and quickmongo
+// returns them as numbers, then v.escape() throws "v.escape is not a function"
+// and the request hangs with no response. Read every type through String() and
+// report a missing key as "undefined" so $switch falls back to its default.
+const getVarFn = api.interpreter.functions.find(f => f.data?.name?.toLowerCase() === 'getvar');
+if (getVarFn) {
+  getVarFn.code = async d => {
+    let r = d.unpack(d);
+    if (!d.interpreter.db) return Utils.Warn('No database set yet, error in:', d.func);
+    if (!r.inside) return Utils.Warn('Invalid inside provided in:', d.func);
+    let v = await d.interpreter.db.get(r.inside.unescape());
+    let out;
+    if (v === null || v === undefined) out = 'undefined';
+    else if (typeof v === 'object') out = JSON.stringify(v, null, 2).escape() || 'undefined';
+    else out = String(v).escape() || 'undefined';
+    return {
+      code: d.code.resolve(`${d.func}[${r.inside}]`, out)
+    };
+  };
+}
+
+// $hasVar has the same two problems: it looks the key up without unescaping it
+// (a userid holding ";" or "$" is stored unescaped by $setVar and never found
+// again) and it reports a stored 0 / false as missing. A key exists when the
+// database returns anything but null / undefined.
+const hasVarFn = api.interpreter.functions.find(f => f.data?.name?.toLowerCase() === 'hasvar');
+if (hasVarFn) {
+  hasVarFn.code = async d => {
+    let r = d.unpack(d);
+    if (!d.interpreter.db) return Utils.Warn('No database set yet, error in:', d.func);
+    if (!r.inside) return Utils.Warn('Invalid inside provided in:', d.func);
+    let v = await d.interpreter.db.get(r.inside.unescape());
+    return {
+      code: d.code.resolve(`${d.func}[${r.inside}]`, (v !== null && v !== undefined) ? 'true' : 'false')
+    };
+  };
+}
+
+// $deleteVar looks its key up raw as well, unescape it for the same reason.
+const deleteVarFn = api.interpreter.functions.find(f => f.data?.name?.toLowerCase() === 'deletevar');
+if (deleteVarFn) {
+  deleteVarFn.code = async d => {
+    let r = d.unpack(d);
+    if (!d.interpreter.db) return Utils.Warn('No database set yet, error in:', d.func);
+    if (!r.inside) return Utils.Warn('Invalid inside provided in:', d.func);
+    await d.interpreter.db.delete(r.inside.unescape());
+    return {
+      code: d.code.resolve(`${d.func}[${r.inside}]`, '')
+    };
+  };
+}
 api.setSpaces(1)
 api.interpreter.addFunction({
     data: new FunctionBuilder()
@@ -117,7 +198,7 @@ api.interpreter.addFunction({
     } else {
       reply = { error: 'Request failed' };
     }
-    reply = noDollar(reply);
+    // no stripping: $getData escapes the "$" to "@dollar", see above
     d._.request_data = reply;
     if (objectMode) d._.object = { status, request: data, response: reply };
     return {
@@ -167,7 +248,8 @@ api.interpreter.addFunction({
     } else {
       reply = { error: 'Request failed' };
     }
-    d._.request_data = noDollar(reply);
+    // no stripping: $getData escapes the "$" to "@dollar", see above
+    d._.request_data = reply;
     return {
       code: d.code.resolve(`${d.func}[${r.inside}]`, status.toString())
     };
