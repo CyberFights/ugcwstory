@@ -262,13 +262,15 @@
                     opponent (health, stamina, trapped), null when there is
                     none
 
-  A dollar sign never arrives in these three fields. easy-api.ts reads a bare
-  dollar sign as the start of a function name even inside a value that travels
-  through $getData, so an answer carrying one - "that costs $5" is enough -
-  would take the rest of the response with it and leave it unresolved. $httpGet
-  therefore strips the dollar sign out of every answer it brings back, see
-  index.js. Quotes, brackets, semicolons and newlines all travel through as
-  they are, and so does every move word the second damage calculator scans for.
+  A dollar sign travels through these three fields as it is. easy-api.ts reads a
+  bare dollar sign as the start of a function name even inside a value, so an
+  answer carrying one - "that costs $5" is enough - used to take the rest of
+  the response with it and leave it unresolved. index.js therefore escapes the
+  sign to @dollar on the way in ($getQuery, $getData, $getVar) and unescapes it
+  on the way out ($send, $encodeURI), which keeps a "$var" in the message or a
+  "$5" in the ai reply from breaking the unpack of the route. Quotes, brackets,
+  semicolons and newlines all travel through as they are, and so does every
+  move word the second damage calculator scans for.
 
   The required stats travel the way the roleplay route reads them: the self
   size comes from self_height / self_weight, the opponent size is taken from
