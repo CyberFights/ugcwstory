@@ -24,35 +24,32 @@ module.exports = {
   $setVar[$getQuery[userid]-time;$ternary[$getQuery[time]==AM;day;$ternary[$getQuery[time]==PM;night;]]]
     $tryIf[$getVar[$getQuery[userid]-opponent]==lizard;@setVar(@getQuery(userid)-oh;183) @setVar(@getQuery(userid)-ow;75)]
   $tryIf[$getVar[$getQuery[userid]-opponent]==bandit;@setVar(@getQuery(userid)-oh;177) @setVar(@getQuery(userid)-ow;79)]
-  $tryIf[$getVar[$getQuery[userid]-chance]==true;@setVar(@getQuery(userid)-encountered;true)]
-  $setVar[$getQuery[userid]-chance;$random[true;false;false;false]]
-  $tryif[$getVar[$getQuery[userid]-location]==ruincity1;@setVar(@getQuery(userid)-opponent;@get(random))
+  $tryIf[$getVar[$getQuery[userid]-chance]==true;@setVar(@getQuery(userid)-encounter;true)]
+  $setVar[$getQuery[userid]-chance;$random[true;false;false]]
+  $tryIf[$getVar[$getQuery[userid]-location]==ruincity1;@setVar(@getQuery(userid)-opponent;@get(random))
 @var(random;@random(lizard;bandit))]
-  $tryif[$getVar[$getQuery[userid]-location]==ruincity2;@setVar(@getQuery(userid)-opponent;@get(random))
+  $tryIf[$getVar[$getQuery[userid]-location]==ruincity2;@setVar(@getQuery(userid)-opponent;@get(random))
 @var(random;@random(lizard;bandit))]
-  $tryif[$getVar[$getQuery[userid]-location]==ruincity3;@setVar(@getQuery(userid)-opponent;@get(random))
+  $tryIf[$getVar[$getQuery[userid]-location]==ruincity3;@setVar(@getQuery(userid)-opponent;@get(random))
 @var(random;@random(lizard;bandit))]
-  $tryif[$getVar[$getQuery[userid]-location]==ruincity4;@setVar(@getQuery(userid)-opponent;@get(random))
+  $tryIf[$getVar[$getQuery[userid]-location]==ruincity4;@setVar(@getQuery(userid)-opponent;@get(random))
 @var(random;@random(lizard;bandit))]
-  $tryif[$getVar[$getQuery[userid]-location]==ruincity5;@setVar(@getQuery(userid)-opponent;@get(random))
+  $tryIf[$getVar[$getQuery[userid]-location]==ruincity5;@setVar(@getQuery(userid)-opponent;@get(random))
 @var(random;@random(lizard;bandit))]
-$tryif[$getVar[$getQuery[userid]-location]==forest1;@setVar(@getQuery(userid)-opponent;@get(random))
-@var(random;@random(paras;venonat;caterpie;weedle;spinark))]
-$tryif[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==grass;@setVar(@getQuery(userid)-encounter;@get(random))
-@var(random;@random(true;false;false))]
+
   $var[above;$getVar[pokelocation$math[$getVar[$getQuery[userid]-position]-6]]]
   $var[below;$getVar[pokelocation$math[$getVar[$getQuery[userid]-position]+6]]]
   $var[right;$getVar[pokelocation$math[$getVar[$getQuery[userid]-position]+1]]]
   $var[left;$getVar[pokelocation$math[$getVar[$getQuery[userid]-position]-1]]]
-  $tryif[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==route1;@setVar(@getQuery(userid)-location;route1)
+  $tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==route1;@setVar(@getQuery(userid)-location;route1)
   @setVar(@getQuery(userid)-position;@replaceText(@replaceText(@getQuery(movement);right;13);left;18)))]
-  $tryif[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity4;@setVar(@getQuery(userid)-location;ruincity4)
+  $tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity4;@setVar(@getQuery(userid)-location;ruincity4)
   @setVar(@getQuery(userid)-position;31) @setVar(@getQuery(userid)-movement;up)]
-  $tryif[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity3;@setVar(@getQuery(userid)-location;ruincity3)
+  $tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity3;@setVar(@getQuery(userid)-location;ruincity3)
   @setVar(@getQuery(userid)-position;18)]
-$tryif[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity1;@setVar(@getQuery(userid)-location;ruincity1)
+$tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity1;@setVar(@getQuery(userid)-location;ruincity1)
 @setVar(@getQuery(userid)-position;6)]  
-  $tryif[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity2;@setVar(@getQuery(userid)-location;ruincity2)
+  $tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity2;@setVar(@getQuery(userid)-location;ruincity2)
   @setVar(@getQuery(userid)-position;30)]
     $setVar[$getQuery[userid]-movement;$getQuery[movement]]
   $setVar[pokelocation36;$getSplit[36]]
@@ -92,7 +89,7 @@ $tryif[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity1;@setV
   $setVar[pokelocation2;$getSplit[2]]
   $setVar[pokelocation1;$getSplit[1]]
   $split[$getVar[terrain-$getVar[$getQuery[userid]-location]];/]
-  $tryif[$getVar[pokelocation$get[math]]!=x;@setVar(@getQuery(userid)-position;@get(math))]
+  $tryIf[$getVar[pokelocation$get[math]]!=x;@setVar(@getQuery(userid)-position;@get(math))]
   $var[math;$math[$getVar[$getQuery[userid]-position] $replaceText[$replaceText[$replaceText[$replaceText[$getQuery[movement];up;-];down;+];right;+];left;-] $getQuery[amount]]]
 $setVar[$getQuery[userid]-encounter;false]  
   `}
