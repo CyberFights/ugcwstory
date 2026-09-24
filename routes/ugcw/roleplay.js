@@ -17,9 +17,9 @@
                                                   (system_prompt is accepted as an alias;
                                                   empty = wrestle-ai default Jax Nova persona)
   in_battle         OPTIONAL  -> in_battle        true | false   (default true)
-  self_height       OPTIONAL  -> height           self height in CM (same as battle-turn),
+  self_height       OPTIONAL  -> height           self height in CM (overrides stored value),
                                                   converted to inches for wrestle-ai
-  self_weight       OPTIONAL  -> weight           self weight in KG (same as battle-turn),
+  self_weight       OPTIONAL  -> weight           self weight in KG (overrides stored value),
                                                   converted to lbs for wrestle-ai
   humanize          OPTIONAL  -> humanize         true | false   (default true)
   self_health       OPTIONAL  -> self_health      0 - 100        (default 100)
@@ -27,12 +27,12 @@
   opponent_health   OPTIONAL  -> opponent_health  0 - 100        (default 100)
   opponent_trapped  OPTIONAL  -> opponent_trapped true | false   (default false)
 
-  Sizes follow battle-turn.js exactly: self from self_height / self_weight
-  (remembered in <userid>-sh / -sw), the opponent from the <userid>-oh /
-  <userid>-ow keys written by move.js. When *_health / *_trapped are not
-  sent they are derived from the <userid>-battle-*-hp (as a percent of
-  max_hp) and <userid>-battle-*-hold keys, so the route can be chained
-  straight after /ugcw/battle-turn.
+  Battle-turn reads the self size from <userid>-sh / -sw (set by game-new.js)
+  and the opponent size from <userid>-oh / -ow (set by move.js). This route
+  also accepts optional self_height / self_weight query overrides. When
+  *_health / *_trapped are not sent they are derived from the <userid>-battle-*-hp
+  (as a percent of max_hp) and <userid>-battle-*-hold keys, so the route can be
+  chained straight after /ugcw/battle-turn.
 
   RESPONSE  (built with $createObject + $request, sent with "safe")
   --------
@@ -114,9 +114,9 @@ $ignore[wrestle-ai wants self size in inches / lbs, battle-turn works in cm / kg
 $var[height;$fixed[$math[$get[sh]/2.54];0]]
 $var[weight;$fixed[$math[$get[sw]*2.20462];0]]
 
-$ignore[same inputs as battle-turn: self_height / self_weight from the query
- (cm / kg), opponent size from the <userid>-oh / -ow keys set by move.js.
- self size also falls back to the last values this route stored]
+$ignore[battle-turn reads self size from game-new and opponent size from move.
+ This route also accepts self_height / self_weight query overrides (cm / kg)
+ and otherwise falls back to the saved values]
 $var[sh;$ternary[$isNumber[$get[sh]]==true;$get[sh];183]]
 $var[sw;$ternary[$isNumber[$get[sw]]==true;$get[sw];95]]
 $var[sh;$ternary[$getQuery[self_height]==undefined;$getVar[$get[uid]-sh];$getQuery[self_height]]]
