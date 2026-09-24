@@ -6,7 +6,7 @@
 
   Forwards the turn to the Wrestle-ai server with a JSON POST to
     https://wrestle-ai-production.up.railway.app/ugcw_rp
-  (custom $httpPost function, see index.js) and returns the AI reply
+  ($request[url;POST;object], see index.js) and returns the AI reply
   together with everything that was sent.
 
   QUERY PARAMETERS  (mirror the /ugcw_rp request body)
@@ -34,7 +34,7 @@
   max_hp) and <userid>-battle-*-hold keys, so the route can be chained
   straight after /ugcw/battle-turn.
 
-  RESPONSE  (built with $createObject + $httpPost, sent with "safe")
+  RESPONSE  (built with $createObject + $request, sent with "safe")
   --------
   {
    "status": 200,                       http status returned by wrestle-ai
@@ -70,10 +70,10 @@ $tryIf[$get[valid]==1;@setVar(@get(uid)-rp-last-response;@getData(response))]
 $tryIf[$get[valid]==1;@setVar(@get(uid)-rp-last-status;@get(status))]
 
 $ignore[==========================================================================
- STEP 2 - POST the object to wrestle-ai (no inline body = use the object)
+ STEP 2 - POST the object to wrestle-ai ($request body "object" = use the object)
 ==========================================================================]
 
-$tryIf[$get[valid]==1;@var(status;@httpPost(https://wrestle-ai-production.up.railway.app/ugcw_rp))]
+$tryIf[$get[valid]==1;@var(status;@request(https://wrestle-ai-production.up.railway.app/ugcw_rp;POST;object))]
 
 $ignore[==========================================================================
  STEP 1 - BUILD the request body from the collected variables
