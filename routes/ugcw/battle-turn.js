@@ -7,9 +7,7 @@ $ignore[========================================================================
  the own turn, the turn the ai answered with and the state after both of them
 ==========================================================================]
 
-$send[
-  200;
-  json;
+$send[200;json;
   {
     "battle_id": "$get[uid]",
     "status": "$get[status]",
@@ -45,6 +43,7 @@ $send[
       "weight_kg": $get[sw],
       "bmi": $get[sbmi],
       "build": "$get[sbuild]",
+      "size_source": "$get[shsrc]",
       "max_hp": $get[smaxhp],
       "hp_before": $get[selfhp],
       "hp": $get[selfhpnew],
@@ -60,6 +59,7 @@ $send[
       "weight_kg": $get[ow],
       "bmi": $get[obmi],
       "build": "$get[obuild]",
+      "size_source": "$get[ohsrc]",
       "max_hp": $get[omaxhp],
       "hp_before": $get[opphp],
       "hp": $get[opphpnew],
@@ -517,24 +517,22 @@ $ignore[========================================================================
  STEP 3 - CHECK HEIGHT AND WEIGHT RANGE
 ==========================================================================]
 
-$if[$get[ow]<20;400;{"error": "'opponent_weight' out of range, send a value between 20 and 400 kg"}]
-$if[$get[ow]>400;400;{"error": "'opponent_weight' out of range, send a value between 20 and 400 kg"}]
-$if[$get[oh]<50;400;{"error": "'opponent_height' out of range, send a value between 50 and 300 cm"}]
-$if[$get[oh]>300;400;{"error": "'opponent_height' out of range, send a value between 50 and 300 cm"}]
-$if[$get[sw]<20;400;{"error": "'self_weight' out of range, send a value between 20 and 400 kg"}]
-$if[$get[sw]>400;400;{"error": "'self_weight' out of range, send a value between 20 and 400 kg"}]
-$if[$get[sh]<50;400;{"error": "'self_height' out of range, send a value between 50 and 300 cm"}]
-$if[$get[sh]>300;400;{"error": "'self_height' out of range, send a value between 50 and 300 cm"}]
+$ignore[every size is stored or the default, both already known good, so this
+ only catches an absurd stored value - the payload names it (source "stored")]
+$if[$get[ow]<20;400;{"error": "'opponent_weight' out of range, must be 20-400 kg","got": "$get[ow]","source": "$get[owsrc]"}]
+$if[$get[ow]>400;400;{"error": "'opponent_weight' out of range, must be 20-400 kg","got": "$get[ow]","source": "$get[owsrc]"}]
+$if[$get[oh]<50;400;{"error": "'opponent_height' out of range, must be 50-300 cm","got": "$get[oh]","source": "$get[ohsrc]"}]
+$if[$get[oh]>300;400;{"error": "'opponent_height' out of range, must be 50-300 cm","got": "$get[oh]","source": "$get[ohsrc]"}]
+$if[$get[sw]<20;400;{"error": "'self_weight' out of range, must be 20-400 kg","got": "$get[sw]","source": "$get[swsrc]"}]
+$if[$get[sw]>400;400;{"error": "'self_weight' out of range, must be 20-400 kg","got": "$get[sw]","source": "$get[swsrc]"}]
+$if[$get[sh]<50;400;{"error": "'self_height' out of range, must be 50-300 cm","got": "$get[sh]","source": "$get[shsrc]"}]
+$if[$get[sh]>300;400;{"error": "'self_height' out of range, must be 50-300 cm","got": "$get[sh]","source": "$get[shsrc]"}]
 
 $ignore[==========================================================================
  STEP 2 - CHECK REQUIRED INPUTS AND TYPES
 ==========================================================================]
 
 $if[$getQuery[message]==undefined;400;{"error": "Missing required query parameter: message"}]
-$if[$isNumber[$get[ow]]==false;400;{"error": "'opponent_weight' must be a number in kilograms"}]
-$if[$isNumber[$get[oh]]==false;400;{"error": "'opponent_height' must be a number in centimeters"}]
-$if[$isNumber[$get[sw]]==false;400;{"error": "'self_weight' must be a number in kilograms"}]
-$if[$isNumber[$get[sh]]==false;400;{"error": "'self_height' must be a number in centimeters"}]
 $if[$get[uid]==undefined;400;{"error": "Missing required query parameter: userid"}]
 
 $ignore[==========================================================================
@@ -542,11 +540,31 @@ $ignore[========================================================================
 ==========================================================================]
 
 $var[uid;$replaceText[$getQuery[userid];";]]
-$ignore[self size comes from game-new; opponent size comes from move]
-$var[sh;$getVar[$getQuery[userid]-sh]]
-$var[sw;$getVar[$getQuery[userid]-sw]]
-$var[oh;$getVar[$getQuery[userid]-oh]]
-$var[ow;$getVar[$getQuery[userid]-ow]]
+$ignore[==========================================================================
+ FIGHTER SIZE - read from the game state, never from the query:
+   <userid>-sh / -sw are written by game-new for the player,
+   <userid>-oh / -ow are written by move for the opponent standing in front
+   of the player, so a turn always fights the rival the map handed out.
+ A missing value falls back to the same sizes roleplay.js uses
+ (183 / 95 / 180 / 80) - that fallback, not the old self_height / self_weight /
+ opponent_height / opponent_weight query, is what keeps a caller without saved
+ game state from getting a 400. size_source in the answer says which was used
+ and the range 400 names it too, so a fight held with default sizes is visible
+ instead of silent.
+==========================================================================]
+$var[sh;$ternary[$isNumber[$get[shdb]]==true;$get[shdb];183]]
+$var[sw;$ternary[$isNumber[$get[swdb]]==true;$get[swdb];95]]
+$var[oh;$ternary[$isNumber[$get[ohdb]]==true;$get[ohdb];180]]
+$var[ow;$ternary[$isNumber[$get[owdb]]==true;$get[owdb];80]]
+$ignore[stored or default, reported by the range 400 and in the answer]
+$var[shsrc;$ternary[$isNumber[$get[shdb]]==true;stored;default]]
+$var[swsrc;$ternary[$isNumber[$get[swdb]]==true;stored;default]]
+$var[ohsrc;$ternary[$isNumber[$get[ohdb]]==true;stored;default]]
+$var[owsrc;$ternary[$isNumber[$get[owdb]]==true;stored;default]]
+$var[shdb;$getVar[$getQuery[userid]-sh]]
+$var[swdb;$getVar[$getQuery[userid]-sw]]
+$var[ohdb;$getVar[$getQuery[userid]-oh]]
+$var[owdb;$getVar[$getQuery[userid]-ow]]
 $var[mvraw;$lowercase[$getQuery[move]]]
 $var[msg;$getQuery[message]]
 $var[reset;$ternary[$getQuery[reset]==1;true;$ternary[$getQuery[reset]==true;true;false]]]
