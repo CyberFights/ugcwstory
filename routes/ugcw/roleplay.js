@@ -24,8 +24,8 @@
   humanize          OPTIONAL  -> humanize         true | false   (default true)
   self_health       OPTIONAL  -> self_health      0 - 100        (default 100)
   self_trapped      OPTIONAL  -> self_trapped     true | false   (default false)
-  opponent_health   OPTIONAL  -> opponent_health  0 - 100        (default 100)
-  opponent_trapped  OPTIONAL  -> opponent_trapped true | false   (default false)
+  opponent_health   OPTIONAL  -> opponent_health    0 - 100        (default 100)
+  opponent_trapped  OPTIONAL  -> opponent_trapped   true | false   (default false)
 
   Battle-turn reads the self size from <userid>-sh / -sw (set by game-new.js)
   and the opponent size from <userid>-oh / -ow (set by move.js). This route
@@ -33,6 +33,12 @@
   *_health / *_trapped are not sent they are derived from the <userid>-battle-*-hp
   (as a percent of max_hp) and <userid>-battle-*-hold keys, so the route can be
   chained straight after /ugcw/battle-turn.
+
+  The body additionally sends the opponent object { health, stamina, trapped }
+  that wrestle-ai's /ugcw_rp normalizes from first (it uses
+  opponent_health / opponent_trapped only as fallbacks). Both get the same
+  values; stamina is 100 because the battle engine keeps no stamina state
+  (the default wrestle-ai itself applies to both fighters).
 
   RESPONSE  (built with $createObject + $request, sent with "safe")
   --------
@@ -79,6 +85,11 @@ $ignore[========================================================================
  STEP 1 - BUILD the request body from the collected variables
 ==========================================================================]
 
+$ignore[opponent object: wrestle-ai's /ugcw_rp normalizes the opponent state
+ from the opponent key first and uses opponent_health / opponent_trapped only
+ as fallbacks, so both are sent with the same values. stamina is 100 because
+ the battle engine keeps no stamina state, the default wrestle-ai applies.]
+$setObjectKey[opponent;{"health": $get[opphp], "stamina": 100, "trapped": $get[opptrapped]}]
 $setObjectKey[opponent_trapped;$get[opptrapped]]
 $setObjectKey[opponent_health;$get[opphp]]
 $setObjectKey[self_trapped;$get[selftrapped]]
