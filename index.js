@@ -256,6 +256,93 @@ api.interpreter.addFunction({
   }
     })
 
+// easy-api.ts 1.2.0 ships a $request[link;json config?;...headers?] that
+// returns nothing and swallows the http status. The interpreter runs the FIRST
+// function with a matching name, so the built-in is removed and replaced by
+// $request[url;METHOD?;body?;...headers?]:
+//   METHOD  GET | POST | PUT | PATCH | DELETE   (default GET)
+//   body    "object" -> the object built with $createObject/$setObjectKey,
+//           which then becomes {status, request, response} for $send[..;safe]
+//           inline JSON -> sent as is,  empty -> no body
+// Returns the http status code (0 when the request failed); the reply can be
+// read with $getData[key].
+api.interpreter.functions = api.interpreter.functions.filter(f => f.data.name.toLowerCase() !== 'request');
+api.interpreter.addFunction({
+    data: new FunctionBuilder()
+    .setName('request')
+  .setValue('description', 'Sends a http request. Body "object" = the object built with $createObject/$setObjectKey (the object then becomes {status, request, response} for $send[..;safe]), or inline JSON. The reply can be read with $getData[key].')
+  .setValue('use', '$request[url;method?;body?;...headers?]')
+  .setValue('returns', 'Number (http status code, 0 when the request failed)'),
+  code: async d => {
+    let r = d.unpack(d);
+    if (!r.inside) return Utils.Warn('Invalid inside provided in:', d.func);
+    let [url, method, body, ...headers] = r.splits;
+    if (!url || !url.unescape().startsWith('http')) return Utils.Warn('You need to provide a valid url in:', d.func);
+    method = (method && method.trim() ? method.unescape().trim() : 'GET').toUpperCase();
+    if (!['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) return Utils.Warn('Invalid method provided in:', d.func);
+
+    // "100" -> 100, "true" -> true so the remote API receives real types
+    const coerce = v => {
+      if (Array.isArray(v)) return v.map(coerce);
+      if (v && typeof v === 'object') { for (const k of Object.keys(v)) v[k] = coerce(v[k]); return v; }
+      if (typeof v !== 'string') return v;
+      const t = v.trim();
+      if (t === 'true') return true;
+      if (t === 'false') return false;
+      if (t === 'null' || t === 'undefined') return null;
+      if (t !== '' && Utils.isNumber(t.replace('.', ''))) return Number(t);
+      return v;
+    };
+
+    let data;
+    const b = body ? body.trim() : '';
+    const objectMode = b.toLowerCase() === 'object';
+    if (objectMode) {
+      if (!d._.object) return Utils.Warn('Body "object" but no object found, use $createObject first. In:', d.func);
+      data = coerce(JSON.parse(JSON.stringify(d._.object).unescape()));
+    } else if (b) {
+      data = Utils.loadObject(body.unescape());
+      if (!data) return Utils.Warn('Invalid JSON body provided in:', d.func);
+    }
+
+    let reqHeaders = { 'Accept': 'application/json' };
+    if (data !== undefined) reqHeaders['Content-Type'] = 'application/json';
+    for (const header of headers) {
+      let h = header.unescape();
+      let i = h.indexOf(':');
+      if (i < 1) { Utils.Warn('Invalid header provided in:', d.func); continue; }
+      reqHeaders[h.slice(0, i).trim()] = h.slice(i + 1).trim();
+    }
+
+    const axios = require('axios');
+    let status = 0;
+    let reply;
+    const res = await axios({
+      method: method.toLowerCase(),
+      url: url.unescape(),
+      data,
+      headers: reqHeaders,
+      timeout: 120000,
+      validateStatus: () => true
+    }).catch(e => {
+      Utils.Warn(`Request failed (${e.message}) in:`, d.func);
+      return null;
+    });
+    if (res) {
+      status = res.status;
+      reply = typeof res.data === 'object' && res.data !== null ? res.data : { response: res.data };
+    } else {
+      reply = { error: 'Request failed' };
+    }
+    // no stripping: $getData escapes the "$" to "@dollar", see above
+    d._.request_data = reply;
+    if (objectMode) d._.object = { status, request: data, response: reply };
+    return {
+      code: d.code.resolve(`${d.func}[${r.inside}]`, status.toString())
+    };
+  }
+    })
+
 api.on('error', () => {null})
 
 // We're connecting to the API when the source has been loaded
