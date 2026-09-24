@@ -28,7 +28,10 @@
   opponent_trapped  OPTIONAL  -> opponent_trapped   true | false   (default false)
 
   Battle-turn reads the self size from <userid>-sh / -sw (set by game-new.js)
-  and the opponent size from <userid>-oh / -ow (set by move.js). This route
+  and the opponent size from <userid>-oh / -ow (set by move.js) and ignores
+  self_height / self_weight / opponent_height / opponent_weight entirely,
+  falling back to 183 / 95 / 180 / 80 when a value is not stored (size_source
+  in its answer says which). This route
   also accepts optional self_height / self_weight query overrides. When
   *_health / *_trapped are not sent they are derived from the <userid>-battle-*-hp
   (as a percent of max_hp) and <userid>-battle-*-hold keys, so the route can be
