@@ -230,8 +230,9 @@ api.interpreter.addFunction({
     const axios = require('axios');
     let status = 0;
     let reply;
-    // the timeout stays above the 120s the roleplay route gives wrestle-ai so
-    // its own error payload arrives before this call gives up
+    // the timeout stays above the worst case of the local roleplay pipeline
+    // (several Mistral attempts with backoff) so its own error payload
+    // arrives before this call gives up
     const res = await axios({
       method: 'get',
       url: url.unescape(),
@@ -340,6 +341,33 @@ api.interpreter.addFunction({
     return {
       code: d.code.resolve(`${d.func}[${r.inside}]`, status.toString())
     };
+  }
+    })
+
+// The roleplay route used to $request its object to the wrestle-ai server's
+// /ugcw_rp endpoint. That endpoint's pipeline is now a local copy inside
+// routes/ugcw/roleplay.js (with its modules under wrestle-ai/) and this
+// function calls the copy instead of the network. Same object contract as
+// $request: the body is the object built with $createObject/$setObjectKey
+// ("object"), and the object becomes {status, request, response} for
+// $send[..;safe]. Returns the status code (0 when the local module cannot
+// run — the same answer the old bridge gave when wrestle-ai was unreachable).
+api.interpreter.addFunction({
+    data: new FunctionBuilder()
+    .setName('ugcwRpLocal')
+  .setValue('description', 'Runs the local copy of wrestle-ai /ugcw_rp (routes/ugcw/roleplay.js) on the object built with $createObject/$setObjectKey. Body "object" = the object, which becomes {status, request, response} for $send[..;safe].')
+  .setValue('use', '$ugcwRpLocal[object]')
+  .setValue('returns', 'Number (http-style status code, 0 when the pipeline could not run)'), 
+  code: async d => {
+    try {
+      return await require('./routes/ugcw/roleplay').ugcwRpLocal(d);
+    } catch (e) {
+      Utils.Warn(`Roleplay module unavailable (${e.message}) in:`, d.func);
+      let r = d.unpack(d);
+      return {
+        code: d.code.resolve(`${d.func}[${r.inside || ''}]`, '0')
+      };
+    }
   }
     })
 
