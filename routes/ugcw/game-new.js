@@ -6,7 +6,9 @@ module.exports = {
   "position": "$getVar[$getQuery[userid]-position]",
   "location": "$getVar[$getQuery[userid]-location]",
   "steps": "0",
-  "current_map": "$get[map]"
+  "current_map": "$get[map]",
+  "height": "$getVar[$getQuery[userid]-sh]",
+  "weight": "$getVar[$getQuery[userid]-sw]"
   }]
 
 $var[map;http://ugcwrp-production.up.railway.app/ugcw/maplocation?userid=$getQuery[userid]&steps=$getVar[$getQuery[userid]-steps]&position=$getVar[$getQuery[userid]-position]&location=$getVar[$getQuery[userid]-location]&time=$getQuery[time]&clock=$getQuery[clock]&stage=$getVar[$getQuery[userid]-stage]]
