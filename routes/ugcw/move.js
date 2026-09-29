@@ -4,7 +4,7 @@ module.exports = {
   $send[200;json;{
   "location": "$getVar[$getQuery[userid]-location]",
   "position": "$getVar[$getQuery[userid]-position]",
-  "terrain": "$getVar[pokelocation$getVar[$getQuery[userid]-position]]",
+  "terrain": "$get[terrain]",
   "movement": "$getQuery[movement]",
   "above": "$get[above]",
   "below": "$get[below]",
@@ -39,59 +39,29 @@ module.exports = {
   $tryIf[$getVar[$getQuery[userid]-location]==ruincity5;@setVar(@getQuery(userid)-opponent;@get(random))
 @var(random;@random(lizard;bandit))]
 
-  $var[above;$getVar[pokelocation$math[$getVar[$getQuery[userid]-position]-6]]]
-  $var[below;$getVar[pokelocation$math[$getVar[$getQuery[userid]-position]+6]]]
-  $var[right;$getVar[pokelocation$math[$getVar[$getQuery[userid]-position]+1]]]
-  $var[left;$getVar[pokelocation$math[$getVar[$getQuery[userid]-position]-1]]]
-  $tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==route1;@setVar(@getQuery(userid)-location;route1)
-  @setVar(@getQuery(userid)-position;@replaceText(@replaceText(@getQuery(movement);right;13);left;18)))]
-  $tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity4;@setVar(@getQuery(userid)-location;ruincity4)
-  @setVar(@getQuery(userid)-position;31) @setVar(@getQuery(userid)-movement;up)]
-  $tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity3;@setVar(@getQuery(userid)-location;ruincity3)
-  @setVar(@getQuery(userid)-position;18)]
-$tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity1;@setVar(@getQuery(userid)-location;ruincity1)
-@setVar(@getQuery(userid)-position;6)]  
-  $tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity2;@setVar(@getQuery(userid)-location;ruincity2)
-  @setVar(@getQuery(userid)-position;30)]
-    $setVar[$getQuery[userid]-movement;$getQuery[movement]]
-  $setVar[pokelocation36;$getSplit[36]]
-  $setVar[pokelocation35;$getSplit[35]]
-  $setVar[pokelocation34;$getSplit[34]]
-  $setVar[pokelocation33;$getSplit[33]]
-  $setVar[pokelocation32;$getSplit[32]]
-  $setVar[pokelocation31;$getSplit[31]]
-  $setVar[pokelocation30;$getSplit[30]]
-  $setVar[pokelocation29;$getSplit[29]]
-  $setVar[pokelocation28;$getSplit[28]]
-  $setVar[pokelocation27;$getSplit[27]]
-  $setVar[pokelocation26;$getSplit[26]]
-  $setVar[pokelocation25;$getSplit[25]]
-  $setVar[pokelocation24;$getSplit[24]]
-  $setVar[pokelocation23;$getSplit[23]]
-  $setVar[pokelocation22;$getSplit[22]]
-  $setVar[pokelocation21;$getSplit[21]]
-  $setVar[pokelocation20;$getSplit[20]]
-  $setVar[pokelocation19;$getSplit[19]]
-  $setVar[pokelocation18;$getSplit[18]]
-  $setVar[pokelocation17;$getSplit[17]]
-  $setVar[pokelocation16;$getSplit[16]]
-  $setVar[pokelocation15;$getSplit[15]]
-  $setVar[pokelocation14;$getSplit[14]]
-  $setVar[pokelocation13;$getSplit[13]]
-  $setVar[pokelocation12;$getSplit[12]]
-  $setVar[pokelocation11;$getSplit[11]]
-  $setVar[pokelocation10;$getSplit[10]]
-  $setVar[pokelocation9;$getSplit[9]]
-  $setVar[pokelocation8;$getSplit[8]]
-  $setVar[pokelocation7;$getSplit[7]]
-  $setVar[pokelocation6;$getSplit[6]]
-  $setVar[pokelocation5;$getSplit[5]]
-  $setVar[pokelocation4;$getSplit[4]]
-  $setVar[pokelocation3;$getSplit[3]]
-  $setVar[pokelocation2;$getSplit[2]]
-  $setVar[pokelocation1;$getSplit[1]]
+  $var[terrain;$getSplit[$getVar[$getQuery[userid]-position]]]
+  $var[above;$ternary[$getVar[$getQuery[userid]-position]>6;$getSplit[$math[$getVar[$getQuery[userid]-position]-6]];x]]
+  $var[below;$ternary[$getVar[$getQuery[userid]-position]<31;$getSplit[$math[$getVar[$getQuery[userid]-position]+6]];x]]
+  $var[right;$ternary[$math[$getVar[$getQuery[userid]-position]%6]!=0;$getSplit[$math[$getVar[$getQuery[userid]-position]+1]];x]]
+  $var[left;$ternary[$math[($getVar[$getQuery[userid]-position]-1)%6]!=0;$getSplit[$math[$getVar[$getQuery[userid]-position]-1]];x]]
   $split[$getVar[terrain-$getVar[$getQuery[userid]-location]];/]
-  $tryIf[$getVar[pokelocation$get[math]]!=x;@setVar(@getQuery(userid)-position;@get(math))]
-  $var[math;$math[$getVar[$getQuery[userid]-position] $replaceText[$replaceText[$replaceText[$replaceText[$getQuery[movement];up;-];down;+];right;+];left;-] $getQuery[amount]]]
+
+  $tryIf[$get[targetterrain]==route1;@setVar(@getQuery(userid)-location;route1) @setVar(@getQuery(userid)-position;@replaceText(@replaceText(@getQuery(movement);right;13);left;18))]
+  $tryIf[$get[targetterrain]==ruincity4;@setVar(@getQuery(userid)-location;ruincity4) @setVar(@getQuery(userid)-position;31) @setVar(@getQuery(userid)-movement;up)]
+  $tryIf[$get[targetterrain]==ruincity3;@setVar(@getQuery(userid)-location;ruincity3) @setVar(@getQuery(userid)-position;18)]
+  $tryIf[$get[targetterrain]==ruincity1;@setVar(@getQuery(userid)-location;ruincity1) @setVar(@getQuery(userid)-position;6)]
+  $tryIf[$get[targetterrain]==ruincity2;@setVar(@getQuery(userid)-location;ruincity2) @setVar(@getQuery(userid)-position;30)]
+
+  $setVar[$getQuery[userid]-movement;$getQuery[movement]]
+  $tryIf[$get[walkable]==true;@setVar(@getQuery(userid)-position;@get(target))]
+  $if[$get[delta]==0;400;{"error": "'movement' must be up, down, left, or right"}]
+  $if[$get[amount]<1;400;{"error": "'amount' must be a positive integer"}]
+  $if[$math[$get[amount]%1]!=0;400;{"error": "'amount' must be a positive integer"}]
+  $var[walkable;$ternary[$get[target]<1;false;$ternary[$get[target]>36;false;$ternary[$getQuery[movement]==right;$ternary[$math[($getVar[$getQuery[userid]-position]-1)%6]+$get[amount]<6;$get[targetterrain]!=x;false];$ternary[$getQuery[movement]==left;$ternary[$get[amount]<=$math[($getVar[$getQuery[userid]-position]-1)%6];$get[targetterrain]!=x;false];$get[targetterrain]!=x]]]]]
+  $var[targetterrain;$getSplit[$get[target]]]
+  $split[$getVar[terrain-$getVar[$getQuery[userid]-location]];/]
+  $var[target;$math[$getVar[$getQuery[userid]-position]+$get[delta]*$get[amount]]]
+  $var[delta;$ternary[$getQuery[movement]==up;-6;$ternary[$getQuery[movement]==down;6;$ternary[$getQuery[movement]==right;1;$ternary[$getQuery[movement]==left;-1;0]]]]]
+  $var[amount;$ternary[$isNumber[$getQuery[amount]]==true;$getQuery[amount];1]]
 $setVar[$getQuery[userid]-encounter;false]  
   `}
