@@ -9,6 +9,9 @@ module.exports = {
   $color[#fff]
   $registerFont[./assets/fonts/Comunismo.ttf;como]
   $opacity[100]
+  $tryIf[$getVar[$getQuery[userid]-stage]==start&&$getVar[$getQuery[userid]-location]==ruincity5;
+  @drawImage(shark;@getVar(positionx15);@getVar(positiony15);80;90)
+  @loadImage(shark;path;./assets/images/wereshark-left.png)]
   $tryIf[$getVar[$getQuery[userid]-stage]==start&&$getVar[$getQuery[userid]-position]==15;
   @drawText(Let me free @getVar(@getQuery(userid)-name);@math(@getVar(positionx20)+15);@math(@getVar(positiony20)+10);@get(w);@get(h))
   @drawImage(textbox;@getVar(positionx20);@getVar(positiony20);@math(@get(w)+50);@math(@get(h)+50))
