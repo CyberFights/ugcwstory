@@ -46,7 +46,7 @@ module.exports = {
   $tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==route1;@setVar(@getQuery(userid)-location;route1)
   @setVar(@getQuery(userid)-position;@replaceText(@replaceText(@getQuery(movement);right;13);left;18)))]
   $tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity4;@setVar(@getQuery(userid)-location;ruincity4)
-  @setVar(@getQuery(userid)-position;31) @setVar(@getQuery(userid)-movement;up)]
+  @setVar(@getQuery(userid)-position;@replaceText(@replaceText(@getQuery(movement);right;7);up;31))) @setVar(@getQuery(userid)-movement;@replaceText(@replaceText(@getQuery(movement);right;right);up;up)))]
   $tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity3;@setVar(@getQuery(userid)-location;ruincity3)
   @setVar(@getQuery(userid)-position;18)]
 $tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity1;@setVar(@getQuery(userid)-location;ruincity1)
