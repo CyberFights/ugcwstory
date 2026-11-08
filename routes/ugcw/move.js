@@ -18,7 +18,7 @@ module.exports = {
   "opponent_height": "$getVar[$getQuery[userid]-oh]",
     "opponent_weight": "$getVar[$getQuery[userid]-ow]"
   }]
-  $var[map;http://ugcwrp-production.up.railway.app/ugcw/maplocation?userid=$getQuery[userid]&steps=$getVar[$getQuery[userid]-steps]&position=$getVar[$getQuery[userid]-position]&location=$getVar[$getQuery[userid]-location]]
+  $var[map;http://ugcwrp-production.up.railway.app/ugcw/maplocation?userid=$getQuery[userid]&steps=$getVar[$getQuery[userid]-steps]&position=$getVar[$getQuery[userid]-position]&location=$getVar[$getQuery[userid]-location]&time=$getQuery[time]&clock=$getQuery[clock]&stage=$getVar[$getQuery[userid]-stage]]
 
   $setVar[$getQuery[userid]-clock;$getQuery[clock]]
   $setVar[$getQuery[userid]-steps;$getQuery[steps]]
@@ -91,9 +91,8 @@ $tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity1;@setV
   $setVar[pokelocation2;$getSplit[2]]
   $setVar[pokelocation1;$getSplit[1]]
   $split[$getVar[terrain-$getVar[$getQuery[userid]-location]];/]
-  $var[targettile;$getVar[pokelocation$get[math]]]
-  $tryIf[$get[targettile]!=undefined&&$get[targettile]!=x;@setVar(@getQuery(userid)-position;@get(math))]
+  $tryIf[$getVar[pokelocation$get[math]]!=x;@setVar(@getQuery(userid)-position;@get(math))]
   $var[math;$math[$getVar[$getQuery[userid]-position] $replaceText[$replaceText[$replaceText[$replaceText[$getQuery[movement];up;-];down;+];right;+];left;-] $getQuery[amount]]]
 $setVar[$getQuery[userid]-encounter;false]  
-  `,
-};
+  `
+}
