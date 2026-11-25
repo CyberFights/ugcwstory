@@ -16,7 +16,7 @@ module.exports = {
   "battle_image": "https://raw.githubusercontent.com/CyberFights/ugcwstory/refs/heads/main/assets/images/$getVar[$getQuery[userid]-location]-$getVar[$getQuery[userid]-opponent].jpeg",
   "opponent": "$getVar[$getQuery[userid]-opponent]",
   "opponent_height": "$getVar[$getQuery[userid]-oh]",
-    "opponent_weight": "$getVar[$getQuery[userid]-ow]"
+   "opponent_weight": "$getVar[$getQuery[userid]-ow]"
   }]
   $var[map;http://ugcwrp-production.up.railway.app/ugcw/maplocation?userid=$getQuery[userid]&steps=$getVar[$getQuery[userid]-steps]&position=$getVar[$getQuery[userid]-position]&location=$getVar[$getQuery[userid]-location]&time=$getQuery[time]&clock=$getQuery[clock]&stage=$getVar[$getQuery[userid]-stage]]
 
@@ -29,15 +29,15 @@ module.exports = {
   $tryIf[$getVar[$getQuery[userid]-chance]==true;@setVar(@getQuery(userid)-encounter;true)]
   $setVar[$getQuery[userid]-chance;$random[true;false;false]]
   $tryIf[$getVar[$getQuery[userid]-location]==ruincity1;@setVar(@getQuery(userid)-opponent;@get(random))
- @var(random;@random(lizard;bandit))]
+@var(random;@random(lizard;bandit))]
   $tryIf[$getVar[$getQuery[userid]-location]==ruincity2;@setVar(@getQuery(userid)-opponent;@get(random))
- @var(random;@random(lizard;bandit))]
+@var(random;@random(lizard;bandit))]
   $tryIf[$getVar[$getQuery[userid]-location]==ruincity3;@setVar(@getQuery(userid)-opponent;@get(random))
- @var(random;@random(lizard;bandit))]
+@var(random;@random(lizard;bandit))]
   $tryIf[$getVar[$getQuery[userid]-location]==ruincity4;@setVar(@getQuery(userid)-opponent;@get(random))
- @var(random;@random(lizard;bandit))]
+@var(random;@random(lizard;bandit))]
   $tryIf[$getVar[$getQuery[userid]-location]==ruincity5;@setVar(@getQuery(userid)-opponent;@get(random))
- @var(random;@random(lizard;bandit))]
+@var(random;@random(lizard;bandit))]
 
   $var[above;$getVar[pokelocation$math[$getVar[$getQuery[userid]-position]-6]]]
   $var[below;$getVar[pokelocation$math[$getVar[$getQuery[userid]-position]+6]]]
@@ -94,5 +94,4 @@ $tryIf[$getVar[pokelocation$getVar[$getQuery[userid]-position]]==ruincity1;@setV
   $tryIf[$getVar[pokelocation$get[math]]!=x;@setVar(@getQuery(userid)-position;@get(math))]
   $var[math;$math[$getVar[$getQuery[userid]-position] $replaceText[$replaceText[$replaceText[$replaceText[$getQuery[movement];up;-];down;+];right;+];left;-] $getQuery[amount]]]
 $setVar[$getQuery[userid]-encounter;false]  
-  `
-}
+  `}
