@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>UGCW Story — Ruin City</title>
+<style>
+:root{--cyan:#22d3ee;--blue:#2563eb;--bg:#050914;--panel:rgba(8,20,38,.92);--line:rgba(34,211,238,.45);--txt:#e8f6ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;min-height:100%}
+button{font:inherit;cursor:pointer}
+.screen{display:none;max-width:720px;margin:0 auto;padding:14px 14px 28px;min-height:100vh}
+.screen.on{display:block}
+h1{font-size:34px;line-height:1.05;margin:8px 0 4px;letter-spacing:.5px;text-shadow:0 0 18px rgba(34,211,238,.55)}
+h1 span{color:var(--cyan)}
+.sub{color:#9fc6dd;margin:0 0 16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 0 0 1px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.45)}
+label{display:block;font-size:13px;color:#9fc6dd;margin:12px 0 4px}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0a1526;color:#fff;font-size:16px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.btn{background:linear-gradient(180deg,#0ea5e9,#2563eb);color:#fff;border:1px solid #67e8f9;border-radius:12px;padding:13px 14px;font-weight:700;width:100%;margin-top:12px;box-shadow:0 0 16px rgba(34,211,238,.35)}
+.btn.ghost{background:#0a1526;color:var(--cyan);box-shadow:none}
+.btn:disabled{opacity:.45}
+.btn.small{padding:9px 8px;font-size:14px;margin-top:0}
+.hud{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:6px 0 10px}
+.pill{background:rgba(8,20,38,.9);border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:13px}
+.pill b{color:var(--cyan)}
+#mapWrap{position:relative;width:100%;aspect-ratio:1/1;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#222;box-shadow:0 0 24px rgba(34,211,238,.25)}
+#mapImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+#mapWrap.night #mapImg{filter:brightness(.62) hue-rotate(15deg) saturate(1.1)}
+#grid{position:absolute;inset:0;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr)}
+.cell{border:1px solid rgba(255,255,255,.07)}
+.cell.blocked{background:rgba(255,0,0,.06)}
+.cell.portal{background:rgba(34,211,238,.14)}
+#player{position:absolute;width:13%;aspect-ratio:2/3;z-index:5;transition:left .18s ease,top .18s ease;filter:drop-shadow(0 6px 6px rgba(0,0,0,.6));pointer-events:none}
+#player img{width:100%;height:100%;object-fit:contain}
+.npc{position:absolute;width:11%;aspect-ratio:2/3;z-index:4;pointer-events:none;filter:drop-shadow(0 6px 6px rgba(0,0,0,.6))}
+.npc img{width:100%;height:100%;object-fit:contain}
+#speech{position:absolute;left:6%;right:6%;bottom:8px;z-index:6;background:#fff;color:#111;border:3px solid #111;border-radius:12px;padding:10px 12px;font-weight:700;display:none}
+#dpad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,64px);gap:6px;justify-content:center;margin:14px auto 4px}
+#dpad button{background:rgba(8,20,38,.95);border:1px solid var(--line);color:var(--cyan);border-radius:14px;font-size:26px}
+#dpad .up{grid-column:2;grid-row:1}#dpad .left{grid-column:1;grid-row:2}#dpad .mid{grid-column:2;grid-row:2;font-size:12px;color:#9fc6dd}#dpad .right{grid-column:3;grid-row:2}#dpad .down{grid-column:2;grid-row:3}
+.hint{text-align:center;color:#9fc6dd;font-size:13px;margin:6px 0}
+.bar{height:14px;background:#1e293b;border-radius:999px;overflow:hidden;border:1px solid rgba(255,255,255,.25)}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#a3e635)}
+.bar.foe>i{background:linear-gradient(90deg,#ef4444,#f97316)}
+.fighter{display:flex;gap:10px;align-items:center}
+.fighter .meta{flex:1}
+.fighter h3{margin:0 0 4px;font-size:18px}
+.fighter p{margin:2px 0;color:#cbd5e1;font-size:13px}
+#battleBg{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:14px;border:1px solid var(--line);display:block}
+.moves{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.moves button{background:#0a1526;border:1px solid var(--line);color:#e8f6ff;border-radius:10px;padding:11px 8px;text-align:left}
+.moves button b{display:block}.moves button small{color:#9fc6dd}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.tabs button{background:#0a1526;border:1px solid var(--line);color:#9fc6dd;border-radius:999px;padding:8px 11px}
+.tabs button.on{background:var(--cyan);color:#04202a;font-weight:700}
+#log{background:#020617;border:1px solid var(--line);border-radius:12px;padding:10px;height:150px;overflow:auto;font-size:14px;line-height:1.45;margin-top:12px;white-space:pre-wrap}
+#log b{color:var(--cyan)}
+.note{font-size:12.5px;color:#9fc6dd;line-height:1.5}
+a{color:var(--cyan)}
+</style></head>
+<body>
+<!-- TITLE -->
+<section class="screen on" id="scrTitle">
+  <p class="pill" style="display:inline-block">CYBERFIGHTS • UGCW STORY</p>
+  <h1>RUIN<br><span>CITY</span></h1>
+  <p class="sub">Walk the ruined city. Find Tarsys. Fight the lizard and the bandit. Built from the ugcwstory repo — maps, terrain, positions and battle maths from the server code, playable offline on your phone.</p>
+  <div class="card" id="newCard">
+    <label for="fName">Fighter name</label><input id="fName" value="Naicul" maxlength="24">
+    <div class="row"><div><label for="fH">Height (cm)</label><input id="fH" type="number" value="178" min="50" max="300"></div>
+    <div><label for="fW">Weight (kg)</label><input id="fW" type="number" value="79" min="20" max="400"></div></div>
+    <button class="btn" id="btnNew">▶ New game</button>
+    <button class="btn ghost" id="btnContinue" style="display:none">Continue saved game</button>
+    <p class="note">Live server check: the Railway API at ugcwrp-production.up.railway.app did not answer when this app was built, so this version runs the whole game on your phone and saves to your device. No account or key needed. The live Mistral roleplay reply is replaced by offline fight lines — the battle numbers are the repo's.</p>
+  </div>
+  <p class="note" style="margin-top:14px">Controls: D-pad, swipe on the map, or arrow keys / WASD. Tap a move in battle. Your position, steps and coins save after every move.</p>
+</section>
+
+<!-- MAP -->
+<section class="screen" id="scrMap">
+  <div class="hud"><div class="pill">📍 <b id="hudLoc">ruincity1</b> • Pos <b id="hudPos">27</b></div><div class="pill">🪙 <b id="hudCoins">500</b> • Steps <b id="hudSteps">0</b></div></div>
+  <div class="hud"><div class="pill">👤 <b id="hudName">Naicul</b> • <span id="hudStats"></span></div><button class="btn small" id="btnClock" style="width:auto">☀️ AM</button></div>
+  <div id="mapWrap"><img id="mapImg" alt="Ruin City map">
+    <div id="grid"></div>
+    <div class="npc" id="npcShark" style="display:none"><img src="assets/sprites/wereshark.png" alt="Wereshark"></div>
+    <div class="npc" id="npcTarsys" style="display:none"><img src="assets/sprites/tarsys.png" alt="Tarsys"></div>
+    <div id="player"><img id="playerImg" src="assets/sprites/naicul-down.png" alt="Naicul"></div>
+    <div id="speech"></div>
+  </div>
+  <p class="hint" id="tileHint">Tile: — • Swipe or use the D-pad. Cyan tiles lead to another ruin city.</p>
+  <div id="dpad">
+    <button class="up" data-dir="up">▲</button><button class="left" data-dir="left">◀</button>
+    <button class="mid" id="btnMenu">MENU</button><button class="right" data-dir="right">▶</button><button class="down" data-dir="down">▼</button>
+  </div>
+  <div class="row"><button class="btn ghost" id="btnFree" style="display:none">Free Tarsys</button><button class="btn ghost" id="btnSave">Save &amp; title</button></div>
+  <p class="hint">Encounters happen as you walk. “x” tiles are blocked. Water, rubble and roads can be walked, as in the server's move rules.</p>
+</section>
+
+<!-- BATTLE -->
+<section class="screen" id="scrBattle">
+  <div class="hud"><div class="pill">⚔️ BATTLE • Round <b id="bRound">1</b></div><div class="pill">📍 <b id="bLoc">ruincity1</b></div></div>
+  <img id="battleBg" alt="Battle scene">
+  <div class="card" style="margin-top:10px">
+    <div class="fighter"><div class="meta"><h3 id="foeName">Lizard</h3><p id="foeStats"></p><div class="bar foe"><i id="foeHp"></i></div><p id="foeHpTxt"></p></div></div>
+    <div id="foeLine" style="margin-top:10px;font-style:italic;color:#fde68a"></div>
+  </div>
+  <div class="card" style="margin-top:10px">
+    <div class="fighter"><div class="meta"><h3 id="meName">Naicul</h3><p id="meStats"></p><div class="bar"><i id="meHp"></i></div><p id="meHpTxt"></p></div></div>
+    <p class="note" id="battleState">Your turn — pick a move.</p>
+  </div>
+  <div class="tabs" id="moveTabs"></div>
+  <div class="moves" id="moveGrid"></div>
+  <div class="row" style="margin-top:8px">
+    <button class="btn small" id="btnGuard">🛡 Guard</button><button class="btn small" id="btnRecover">✚ Recover</button>
+    <button class="btn small" id="btnEscape">↩ Escape</button><button class="btn small" id="btnPin">📌 Pin</button>
+    <button class="btn small" id="btnPotion">🧪 Potion (<span id="potionN">0</span>)</button>
+  </div>
+  <div id="log"></div>
+  <button class="btn ghost" id="btnFlee">Run back to the map (forfeit the fight)</button>
+</section>
+
+<script>
+"use strict";
+/* ===== Repo data, copied from ugcwstory/game-new.js + move.js ===== */
+const TERRAIN={
+ ruincity1:"x/x/x/x/x/ruincity2/x/x/x/x/x/-/x/x/x/x/x/-/ruincity3/-/-/-/-/-/x/x/-/x/x/x/x/x/-/x/x/x".split("/"),
+ ruincity3:"water/x/x/x/-/x/water/x/x/x/-/x/water/x/x/x/-/x/water/x/-/-/-/ruincity2/water/x/x/x/x/x/water/water/water/water/x/x".split("/"),
+ ruincity2:"x/ruincity4/x/x/x/x/x/-/-/-/-/-/x/x/x/x/x/-/x/x/x/x/x/-/x/x/x/x/x/-/x/x/x/x/x/ruincity1".split("/"),
+ ruincity5:"water/x/x/x/x/x/water/x/x/x/-/ruincity4/water/x/x/x/-/x/water/x/x/x/-/x/water/x/x/x/-/x/water/x/x/x/ruincity3/x".split("/"),
+ ruincity4:"x/x/x/x/x/x/ruincity5/-/x/x/x/x/x/-/x/x/x/x/x/-/x/x/-/x/x/-/-/-/-/desert1/x/ruincity3/x/x/underground1/x".split("/")
+};
+const MAPS=["ruincity1","ruincity2","ruincity3","ruincity4","ruincity5"];
+const OPPONENTS={lizard:{h:183,w:75,label:"Lizard"},bandit:{h:177,w:79,label:"Bandit"}};
+/* Move DB from battle-turn.js STEP 8: [base, acc, type, style, scaleExpr, recoil, pierce] */
+const MOVES={
+ jab:{base:10,acc:95,type:"swift",style:"basic",scale:(a,d)=>1+(a.speed-d.speed)/150,recoil:0,pierce:0},
+ punch:{base:16,acc:90,type:"strike",style:"basic",scale:()=>1,recoil:0,pierce:0},
+ kick:{base:24,acc:82,type:"strike",style:"basic",scale:(a,d)=>1+(a.h-d.h)/200,recoil:0,pierce:0},
+ headbutt:{base:20,acc:85,type:"strike",style:"basic",scale:(a,d)=>1+(a.tough-d.tough)/200,recoil:.2,pierce:0},
+ tackle:{base:30,acc:78,type:"charge",style:"basic",scale:(a,d)=>(a.w*2)/(a.w+d.w),recoil:.15,pierce:0},
+ throw:{base:28,acc:70,type:"grapple",style:"basic",scale:(a,d)=>a.w/d.w,recoil:0,pierce:0},
+ dropkick:{base:22,acc:76,type:"swift",style:"pro",scale:(a,d)=>1+(a.speed-d.speed)/100,recoil:.2,pierce:0},
+ clothesline:{base:26,acc:80,type:"charge",style:"pro",scale:(a,d)=>(a.w*2)/(a.w+d.w),recoil:.1,pierce:0},
+ bodyslam:{base:30,acc:74,type:"grapple",style:"pro",scale:(a,d)=>a.w/d.w,recoil:.15,pierce:0},
+ suplex:{base:34,acc:70,type:"grapple",style:"pro",scale:(a,d)=>a.w/d.w,recoil:.2,pierce:0},
+ piledriver:{base:42,acc:60,type:"grapple",style:"pro",scale:(a,d)=>a.w/d.w,recoil:.3,pierce:0},
+ armbar:{base:18,acc:70,type:"grapple",style:"sub",scale:(a,d)=>1+(a.tough-d.tough)/200,recoil:0,pierce:1},
+ leglock:{base:20,acc:68,type:"grapple",style:"sub",scale:(a,d)=>a.w/d.w,recoil:0,pierce:1},
+ choke:{base:22,acc:66,type:"grapple",style:"sub",scale:(a,d)=>1+(a.h-d.h)/200,recoil:0,pierce:1},
+ sleeper:{base:24,acc:64,type:"grapple",style:"sub",scale:(a,d)=>a.w/d.w,recoil:0,pierce:1},
+ haymaker:{base:32,acc:62,type:"strike",style:"brawl",scale:()=>1,recoil:.05,pierce:0},
+ stomp:{base:22,acc:80,type:"strike",style:"brawl",scale:(a,d)=>a.w/d.w,recoil:.05,pierce:0},
+ lowblow:{base:13,acc:90,type:"strike",style:"brawl",scale:()=>1,recoil:0,pierce:1},
+ gouge:{base:11,acc:88,type:"swift",style:"brawl",scale:(a,d)=>1+(a.speed-d.speed)/150,recoil:0,pierce:1}
+};
+const GROUPS={basic:["jab","punch","kick","headbutt","tackle","throw"],pro:["dropkick","clothesline","bodyslam","suplex","piledriver"],sub:["armbar","leglock","choke","sleeper"],brawl:["haymaker","stomp","lowblow","gouge"]};
+function stats(h,w){const bmi=+(w*10000/(h*h)).toFixed(1);const build=bmi<20?"light":bmi>26?"heavy":"balanced";
+ return {h,w,bmi,build,maxHp:Math.round(60+w*1.4+h*.35),power:+(w*.75+h*.2).toFixed(1),tough:+(w*.55+h*.15).toFixed(1),speed:Math.max(5,+(h*.55-w*.25).toFixed(1))};}
+function eff(type,build){const t={grapple:{light:1.25,balanced:1,heavy:.8},charge:{light:1.15,balanced:1,heavy:.9},swift:{light:.9,balanced:1,heavy:1.2},strike:{light:1.1,balanced:1,heavy:.85}};return (t[type]||{})[build]||1;}
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+</script>
+<script>
+"use strict";
+/* ===== Save / state ===== */
+const SAVE_KEY="ugcwstory_save_v1";
+let S=null, battle=null, moveTab="basic", busy=false;
+function defState(name,h,w){return {name:name||"Naicul",h:+h||178,w:+w||79,userid:"u"+Math.random().toString(36).slice(2,9),location:"ruincity1",position:27,movement:"down",steps:0,coins:500,potions:0,caught:0,wins:0,stage:"start",time:"AM",freed:false};}
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}}
+function load(){try{const v=localStorage.getItem(SAVE_KEY);return v?JSON.parse(v):null;}catch(e){return null;}}
+const $=id=>document.getElementById(id);
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));$(id).classList.add("on");window.scrollTo(0,0);}
+function tile(pos,loc){return TERRAIN[loc||S.location][pos-1];}
+function posXY(pos){const i=pos-1;return {col:i%6,row:Math.floor(i/6)};}
+function placeSprite(el,pos,extra){const {col,row}=posXY(pos);el.style.left=(col*16.666+1.8)+"%";el.style.top=(row*16.666+(extra||0))+"%";}
+/* ===== Map ===== */
+function buildGrid(){const g=$("grid");g.innerHTML="";for(let i=1;i<=36;i++){const c=document.createElement("div");c.className="cell";c.dataset.pos=i;g.appendChild(c);}updateGrid();}
+function updateGrid(){document.querySelectorAll("#grid .cell").forEach(c=>{const t=tile(+c.dataset.pos);c.classList.toggle("blocked",t==="x");c.classList.toggle("portal",MAPS.includes(t));});}
+function renderMap(){
+ $("hudLoc").textContent=S.location;$("hudPos").textContent=S.position;$("hudCoins").textContent=S.coins;$("hudSteps").textContent=S.steps;
+ $("hudName").textContent=S.name;const st=stats(S.h,S.w);$("hudStats").textContent=`${S.h}cm • ${S.w}kg • ${st.build} • HP ${st.maxHp}`;
+ $("mapImg").src="assets/maps/"+S.location+".jpg";$("mapWrap").classList.toggle("night",S.time==="PM");$("btnClock").textContent=S.time==="AM"?"☀️ AM":"🌙 PM";
+ $("playerImg").src="assets/sprites/naicul-"+S.movement+".png";placeSprite($("player"),S.position);
+ const showNPC=S.location==="ruincity4";
+ $("npcShark").style.display=showNPC?"block":"none";$("npcTarsys").style.display=showNPC?"block":"none";
+ if(showNPC){placeSprite($("npcShark"),20);placeSprite($("npcTarsys"),19,3);}
+ $("tileHint").textContent=`Tile: ${tile(S.position)} • ${S.location} • Swipe or use the D-pad. Cyan tiles lead to another ruin city.`;
+ $("btnFree").style.display=(S.location==="ruincity4"&&!S.freed&&[14,15,19,20,21].includes(S.position))?"block":"none";
+ const sp=$("speech");
+ if(S.location==="ruincity4"&&S.position===15&&!S.freed){sp.style.display="block";sp.textContent=`“Let me free, ${S.name}!” — Tarsys`;}
+ else sp.style.display="none";
+ updateGrid();save();
+}
+function tryMove(dir){
+ if(busy)return;const delta={up:-6,down:6,left:-1,right:1}[dir];const {col,row}=posXY(S.position);
+ if(dir==="left"&&col===0||dir==="right"&&col===5||dir==="up"&&row===0||dir==="down"&&row===5){$("tileHint").textContent="The edge of the map. Try another way.";return;}
+ const target=S.position+delta,t=tile(target);
+ if(t==="x"){$("tileHint").textContent="Blocked — rubble in the way.";S.movement=dir;$("playerImg").src="assets/sprites/naicul-"+dir+".png";save();return;}
+ S.movement=dir;S.steps++;
+ if(MAPS.includes(t)){
+   const entry={ruincity1:6,ruincity2:30,ruincity3:18,ruincity4:(dir==="up"?31:7),ruincity5:6};
+   S.location=t;S.position=entry[t]||6;$("tileHint").textContent=`You cross into ${t}.`;renderMap();return;
+ }
+ if(["route1","desert1","underground1"].includes(t)){$("tileHint").textContent="That way is closed for now — no map for it in the repo yet.";return;}
+ S.position=target;renderMap();
+ if(Math.random()<0.34)startBattle();
+}
+function startBattle(){
+ const key=Math.random()<.5?"lizard":"bandit",o=OPPONENTS[key];
+ const me=stats(S.h,S.w),foe=stats(o.h,o.w);
+ battle={opp:key,round:1,me:{...me,hp:me.maxHp,guard:0,hold:0},foe:{...foe,hp:foe.maxHp,guard:0,hold:0},over:false};
+ $("bLoc").textContent=S.location;$("bRound").textContent=1;$("battleBg").src=`assets/battle/${S.location}-${key}.jpg`;
+ $("foeName").textContent=o.label;$("meName").textContent=S.name;
+ $("foeLine").textContent=`${o.label}: “You walked into the wrong ruin, ${S.name}.”`;
+ $("log").innerHTML="";log(`A wild <b>${o.label}</b> (${o.h}cm, ${o.w}kg) blocks your way!`);
+ renderBattle();show("scrBattle");
+}
+function log(html){const l=$("log");l.innerHTML+=html+"<br>";l.scrollTop=l.scrollHeight;}
+function renderBattle(){
+ const b=battle;if(!b)return;
+ $("foeStats").textContent=`${b.foe.h}cm • ${b.foe.w}kg • ${b.foe.build} • Power ${b.foe.power} • Tough ${b.foe.tough} • Speed ${b.foe.speed}${b.foe.hold?` • HELD (${b.foe.hold})`:""}${b.foe.guard?" • GUARDING":""}`;
+ $("meStats").textContent=`${b.me.h}cm • ${b.me.w}kg • ${b.me.build} • Power ${b.me.power} • Tough ${b.me.tough} • Speed ${b.me.speed}${b.me.hold?` • HELD (${b.me.hold})`:""}${b.me.guard?" • GUARDING":""}`;
+ $("foeHp").style.width=clamp(100*b.foe.hp/b.foe.maxHp,0,100)+"%";$("meHp").style.width=clamp(100*b.me.hp/b.me.maxHp,0,100)+"%";
+ $("foeHpTxt").textContent=`HP ${b.foe.hp} / ${b.foe.maxHp}`;$("meHpTxt").textContent=`HP ${b.me.hp} / ${b.me.maxHp}`;
+ $("potionN").textContent=S.potions;
+}
+/* Damage engine: battle-turn.js STEPS 9-13 */
+function resolve(atk,def,moveName){
+ const m=MOVES[moveName];const out={move:moveName,damage:0,heal:0,recoil:0,hit:false,crit:false,outcome:"hit"};
+ if(atk.hold>0)out.lockpen=.75;else out.lockpen=1;
+ const roll=rnd(0,100);out.hit=roll<m.acc;const critRoll=rnd(0,100);out.crit=critRoll<10;
+ const variance=(m.style==="brawl"?70+rnd(0,60):85+rnd(0,30))/100;
+ const atkr=clamp(+(0.5+0.5*(atk.power/def.tough)).toFixed(2),.6,1.6);
+ const scale=clamp(+m.scale(atk,def).toFixed(2),.7,1.5);
+ const gmult=def.guard&&!m.pierce?.45:1;
+ const crank=m.style==="sub"&&def.hold>0?1.35:1;
+ if(out.hit){out.damage=Math.round(m.base*scale*atkr*variance*eff(m.type,def.build)*gmult*(out.crit?1.6:1)*crank*out.lockpen);
+   out.recoil=m.recoil>0?Math.max(1,Math.round(out.damage*m.recoil)):0;
+   def.hp=Math.max(0,def.hp-out.damage);atk.hp=Math.max(0,atk.hp-out.recoil);
+   if(m.style==="sub")def.hold=2;
+   out.outcome=out.crit?"critical":gmult<1?"guarded":"hit";
+ } else out.outcome="miss";
+ def.guard=0;return out;
+}
+function describe(who,atk,def,out){
+ const nm=who==="me"?S.name:OPPONENTS[battle.opp].label;
+ if(out.outcome==="miss")return `${nm}'s ${out.move} misses.`;
+ if(out.outcome==="critical")return `<b>${nm} lands a CRITICAL ${out.move} for ${out.damage}!</b>`;
+ if(out.outcome==="guarded")return `${nm}'s ${out.move} is guarded — only ${out.damage} gets through.`;
+ return `${nm} hits with ${out.move} for ${out.damage}.`;
+}
+function endBattle(won){
+ battle.over=true;busy=false;
+ if(won){S.wins++;S.caught++;S.coins+=100;if(Math.random()<.5)S.potions++;save();
+   log(`<b>You win!</b> +100 coins${S.potions?" and a potion":""}. The ${OPPONENTS[battle.opp].label} backs off.`);
+   $("battleState").textContent="You win! Heading back to the map…";$("foeLine").textContent=`${OPPONENTS[battle.opp].label}: “Not done yet…”`;
+   setTimeout(()=>{show("scrMap");renderMap();},1400);
+ }else{log(`<b>You lose.</b> You wake up back at the start of ${S.location}.`);$("battleState").textContent="You lose. Back to the map…";
+   setTimeout(()=>{S.position=27;S.location="ruincity1";show("scrMap");renderMap();},1400);}
+}
+function aiPick(){
+ const b=battle;
+ if(b.foe.hold>0&&Math.random()<.5)return "escape";
+ if(b.foe.hp/b.foe.maxHp<.3&&Math.random()<.3)return "recover";
+ if(b.foe.hp/b.foe.maxHp<.3&&Math.random()<.2)return "guard";
+ const pool=["jab","punch","kick","headbutt","tackle","throw","dropkick","clothesline","bodyslam","suplex","armbar","leglock","haymaker","stomp"];
+ return pool[rnd(0,pool.length-1)];
+}
+function doMove(moveName){
+ if(!battle||battle.over||busy)return;
+ if(moveName==="guard"){battle.me.guard=1;log(`You guard. Incoming damage will be cut.`);$("battleState").textContent="Guard up. Opponent's turn…";aiTurn();return;}
+ if(moveName==="recover"){const heal=Math.round(battle.me.maxHp*.22);battle.me.hp=Math.min(battle.me.maxHp,battle.me.hp+heal);log(`You recover <b>+${heal} HP</b>.`);aiTurn();return;}
+ if(moveName==="potion"){if(S.potions<1){$("battleState").textContent="No potions left.";return;}S.potions--;battle.me.hp=Math.min(battle.me.maxHp,battle.me.hp+40);log(`You drink a potion <b>+40 HP</b>.`);save();aiTurn();return;}
+ if(moveName==="escape"){
+   if(battle.me.hold>0){const ratio=(battle.me.w+battle.me.tough)/(battle.foe.w+battle.foe.tough);const acc=clamp(Math.round(10+45*ratio+(battle.me.speed-battle.foe.speed)/10),15,90);
+     if(rnd(0,100)<acc){battle.me.hold=0;battle.me.hp=Math.min(battle.me.maxHp,battle.me.hp+Math.round(battle.me.maxHp*.05));log(`You escape the hold! <b>+${Math.round(battle.me.maxHp*.05)} HP</b>.`);}else log(`You struggle in the hold — no escape.`);}
+   else log(`You back off. Nothing was holding you.`);
+   aiTurn();return;}
+ if(moveName==="pin"){
+   const roll=rnd(0,100),hit=roll<55,pct=100*battle.foe.hp/battle.foe.maxHp;
+   if(hit&&pct<=35){log(`<b>PIN! 1… 2… 3! The ${OPPONENTS[battle.opp].label} is pinned at ${Math.round(pct)}% HP.</b>`);renderBattle();endBattle(true);return;}
+   log(hit?`Pin attempt fails — the ${OPPONENTS[battle.opp].label} is still too strong (${Math.round(pct)}% HP).`:`Pin attempt misses (roll ${roll}).`);aiTurn();return;}
+ busy=true;$("battleState").textContent="Resolving…";
+ const out=resolve(battle.me,battle.foe,moveName);log(describe("me",battle.me,battle.foe,out)+(out.recoil?` Recoil ${out.recoil}.`:""));
+ renderBattle();
+ if(battle.foe.hp<=0){endBattle(true);return;}
+ setTimeout(()=>aiTurn(),650);
+}
+function aiTurn(){
+ if(!battle||battle.over)return;
+ const pick=aiPick();$("battleState").textContent=`${OPPONENTS[battle.opp].label} uses ${pick}…`;
+ setTimeout(()=>{
+  if(pick==="guard"){battle.foe.guard=1;log(`${OPPONENTS[battle.opp].label} guards.`);}
+  else if(pick==="recover"){const heal=Math.round(battle.foe.maxHp*.22);battle.foe.hp=Math.min(battle.foe.maxHp,battle.foe.hp+heal);log(`${OPPONENTS[battle.opp].label} recovers <b>+${heal} HP</b>.`);}
+  else if(pick==="escape"){if(battle.foe.hold>0){battle.foe.hold=0;log(`${OPPONENTS[battle.opp].label} escapes your hold!`);}else log(`${OPPONENTS[battle.opp].label} backs off.`);}
+  else{const out=resolve(battle.foe,battle.me,pick);log(describe("foe",battle.foe,battle.me,out)+(out.recoil?` Recoil ${out.recoil}.`:""));
+    if(battle.me.hold>0)battle.me.hold=Math.max(0,battle.me.hold-1);if(battle.foe.hold>0&&pick!=="escape")battle.foe.hold=Math.max(0,battle.foe.hold-1);}
+  battle.round++;$("bRound").textContent=battle.round;renderBattle();busy=false;
+  if(battle.me.hp<=0){endBattle(false);return;}
+  $("battleState").textContent="Your turn — pick a move.";
+  const lines=["“Is that all you have?”","“My turn.”","“You fight like a tourist.”","“Come on, wrestle me properly.”"];
+  $("foeLine").textContent=`${OPPONENTS[battle.opp].label}: ${lines[rnd(0,lines.length-1)]}`;
+ },550);
+}
+function renderMoves(){
+ const tabs=$("moveTabs");tabs.innerHTML="";
+ Object.keys(GROUPS).forEach(g=>{const b=document.createElement("button");b.textContent=g[0].toUpperCase()+g.slice(1);b.className=moveTab===g?"on":"";b.onclick=()=>{moveTab=g;renderMoves();};tabs.appendChild(b);});
+ const grid=$("moveGrid");grid.innerHTML="";
+ GROUPS[moveTab].forEach(name=>{const m=MOVES[name];const b=document.createElement("button");
+  b.innerHTML=`<b>${name}</b><small>${m.type} • ${m.style} • power ${m.base} • ${m.acc}% hit${m.pierce?" • pierces guard":""}${m.recoil?` • recoil ${Math.round(m.recoil*100)}%`:""}</small>`;
+  b.onclick=()=>doMove(name);grid.appendChild(b);});
+}
+/* ===== Wiring ===== */
+document.querySelectorAll("#dpad button[data-dir]").forEach(b=>b.addEventListener("click",()=>tryMove(b.dataset.dir)));
+document.addEventListener("keydown",e=>{if(!$("scrMap").classList.contains("on"))return;const k=e.key.toLowerCase();const map={arrowup:"up",w:"up",arrowdown:"down",s:"down",arrowleft:"left",a:"left",arrowright:"right",d:"right"};if(map[k]){e.preventDefault();tryMove(map[k]);}});
+let sx=0,sy=0;$("mapWrap").addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+$("mapWrap").addEventListener("touchend",e=>{const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))<28)return;tryMove(Math.abs(dx)>Math.abs(dy)?(dx>0?"right":"left"):(dy>0?"down":"up"));},{passive:true});
+$("btnClock").onclick=()=>{S.time=S.time==="AM"?"PM":"AM";renderMap();};
+$("btnSave").onclick=()=>{save();show("scrTitle");refreshTitle();};
+$("btnMenu").onclick=()=>{save();show("scrTitle");refreshTitle();};
+$("btnFree").onclick=()=>{S.freed=true;S.stage="freed";S.coins+=50;save();$("speech").style.display="block";$("speech").textContent=`“Thank you, ${S.name}! +50 coins.” — Tarsys is free.`;renderMap();};
+$("btnGuard").onclick=()=>doMove("guard");$("btnRecover").onclick=()=>doMove("recover");$("btnEscape").onclick=()=>doMove("escape");$("btnPin").onclick=()=>doMove("pin");$("btnPotion").onclick=()=>doMove("potion");
+$("btnFlee").onclick=()=>{if(battle&&!battle.over){battle.over=true;show("scrMap");renderMap();}};
+$("btnNew").onclick=()=>{S=defState($("fName").value,$("fH").value,$("fW").value);save();buildGrid();renderMap();show("scrMap");};
+$("btnContinue").onclick=()=>{S=load();buildGrid();renderMap();show("scrMap");};
+function refreshTitle(){const s=load();$("btnContinue").style.display=s?"block":"none";if(s)$("btnContinue").textContent=`Continue — ${s.name} in ${s.location} (${s.coins} coins)`;}
+buildGrid();renderMoves();refreshTitle();
+</script>
+</body></html>

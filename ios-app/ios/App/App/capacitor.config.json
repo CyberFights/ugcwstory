@@ -1,0 +1,9 @@
+{
+	"appId": "com.cyberfights.ugcwstory",
+	"appName": "UGCW Story",
+	"webDir": "www",
+	"ios": {
+		"contentInset": "automatic"
+	},
+	"packageClassList": []
+}

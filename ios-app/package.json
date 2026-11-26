@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "@capacitor/core": "^7.4.3"
+  },
+  "description": "UGCW Story: Ruin City iOS app \u2014 the same offline game as the Android build (v1.0), packaged with Capacitor for iPhone and iPad.",
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3",
+    "@capacitor/ios": "^7.4.3",
+    "typescript": "^5.9.3"
+  },
+  "name": "ugcwstory-ios",
+  "private": true,
+  "scripts": {
+    "cap:add:ios": "cap add ios",
+    "cap:copy": "cap copy ios",
+    "cap:open:ios": "cap open ios",
+    "cap:sync": "cap sync ios"
+  },
+  "version": "1.0.0"
+}
